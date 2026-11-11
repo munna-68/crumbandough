@@ -1,5 +1,5 @@
 import { isoDate } from './format'
-import type { BoxOption, Flavour, Offer, PlacedOrder, ReviewTheme } from './types'
+import type { BoxOption, BoxSize, Flavour, OrderBox, PlacedOrder } from './types'
 
 export const BRAND = {
   name: 'crumb and dough',
@@ -9,121 +9,97 @@ export const BRAND = {
   location: 'Melbourne, Australia',
   shortLocation: 'MEL | AUS',
   tagline: 'Chunky, gooey and homemade cookies.',
-  footerLine: 'Pick up or delivery available',
 } as const
 
+/** Placeholder until the kitchen confirms its real fee. */
 export const DELIVERY_FEE = 8
 
 export const BOX_OPTIONS: BoxOption[] = [
-  {
-    size: 4,
-    name: 'the little box',
-    blurb: 'Four cookies. The Monday and Tuesday habit.',
-    price: 24,
-  },
-  {
-    size: 6,
-    name: 'the everyday box',
-    blurb: 'Six cookies. Mix, match, or go all in on one.',
-    price: 35,
-    badge: 'most picked',
-  },
-  {
-    size: 12,
-    name: 'the party box',
-    blurb: 'Twelve cookies. For sharing, or not.',
-    price: 66,
-  },
+  { size: 4, name: 'The little box', price: 24, when: 'Mondays and Tuesdays', numeral: '4' },
+  { size: 6, name: 'The everyday box', price: 35, when: 'Every day', numeral: '6' },
+  { size: 12, name: 'The party box', price: 66, when: 'For sharing, or not', numeral: '12' },
 ]
 
+export const BOX_PRICES: Record<BoxSize, number> = { 4: 24, 6: 35, 12: 66 }
+
+/**
+ * The seven flavours from the shop's own posts. Photos are borrowed placeholders
+ * from the Bake House set until the kitchen's own shots arrive.
+ */
 export const FLAVOURS: Flavour[] = [
   {
     id: 'classic-chocolate',
     name: 'Classic chocolate',
-    desc: 'Rich chocolate cookie loaded with white and dark/milk chocolate chips.',
+    desc: 'Rich chocolate cookie loaded with white, dark and milk chocolate chips.',
     note: 'the house standard',
-    accent: '#c58b52',
-    imageSlot: 'classic-chocolate',
+    tint: '#EBCFAE',
+    accent: '#B9824E',
+    allergens: ['Wheat', 'Milk', 'Egg', 'Soy'],
   },
   {
     id: 'red-velvet',
     name: 'Red velvet',
-    desc: 'Soft cookie with a creamy, tangy cheesecake centre.',
+    desc: 'Soft red velvet with a creamy, tangy cheesecake centre.',
     note: 'the tangy one',
-    accent: '#a8464f',
-    imageSlot: 'red-velvet',
+    tint: '#F0B3BE',
+    accent: '#A83A48',
+    allergens: ['Wheat', 'Milk', 'Egg'],
   },
   {
     id: 'lemon-cheesecake',
     name: 'Lemon cheesecake',
     desc: 'Buttery lemon cookie with a smooth, creamy cheesecake filling.',
     note: 'the bright one',
-    accent: '#d9b95c',
-    imageSlot: 'lemon-cheesecake',
+    tint: '#F5E3A8',
+    accent: '#C9A13A',
+    allergens: ['Wheat', 'Milk', 'Egg'],
   },
   {
     id: 'biscoff',
     name: 'Biscoff',
-    desc: 'Biscoff filled cookie topped with crunchy crumbs and extra Biscoff spread.',
+    desc: 'Biscoff filled, topped with crunchy crumbs and an extra spoon of spread.',
     note: 'the one that drips',
-    accent: '#b3733b',
-    imageSlot: 'biscoff',
+    tint: '#E9BC8E',
+    accent: '#A8652E',
+    allergens: ['Wheat', 'Milk', 'Soy'],
   },
   {
     id: 'white-kitkat',
     name: 'White KitKat',
-    desc: 'White chocolate filled cookie topped with silky glaze and crunchy KitKat.',
+    desc: 'White chocolate filled, finished with a silky glaze and crunchy KitKat.',
     note: 'the white chocolate one',
-    accent: '#e7d5b9',
-    imageSlot: 'white-kitkat',
+    tint: '#F4E6D2',
+    accent: '#C7A57A',
+    allergens: ['Wheat', 'Milk', 'Soy'],
   },
   {
     id: 'reese-s',
     name: "Reese's",
-    desc: 'Decadent dark chocolate cookie with a creamy, salty-sweet peanut butter centre.',
+    desc: 'Dark chocolate dough around a creamy, salty-sweet peanut butter centre.',
     note: 'the salty-sweet one',
-    accent: '#8d5637',
-    imageSlot: 'reese-s',
+    tint: '#EEC39B',
+    accent: '#8D5637',
+    allergens: ['Wheat', 'Milk', 'Peanuts', 'Soy'],
   },
   {
     id: 'oreo',
     name: 'Oreo',
-    desc: 'Oreo frosting filled cookie with chocolate chips, Oreo glaze and extra frosting.',
+    desc: 'Oreo frosting filled, chocolate chips, Oreo glaze and extra frosting.',
     note: 'the extra one',
-    accent: '#4a372e',
-    imageSlot: 'oreo',
+    tint: '#D9C6C9',
+    accent: '#3E2A22',
+    allergens: ['Wheat', 'Milk', 'Soy'],
   },
 ]
 
-export const OFFERS: Offer[] = [
-  {
-    eyebrow: 'every day',
-    title: 'the box of six',
-    detail: 'Six chunky cookies, mix and match. The everyday order.',
-    price: 35,
-  },
-  {
-    eyebrow: 'monday + tuesday',
-    title: 'the little box',
-    detail: 'Four cookies for the start of the week. Same seven flavours.',
-    price: 24,
-  },
-]
+export function flavourById(id: string): Flavour | undefined {
+  return FLAVOURS.find((f) => f.id === id)
+}
 
-export const REVIEW_THEMES: ReviewTheme[] = [
-  {
-    quote: 'The middle is the whole point.',
-    detail: 'Stuffed, gooey, and never a dry bite.',
-  },
-  {
-    quote: 'It arrived looking like the photo.',
-    detail: 'Packed with care, ribbon and all.',
-  },
-  {
-    quote: 'Choosing one flavour is the hard part.',
-    detail: 'So mix and match the whole menu.',
-  },
-]
+/** Cutout photo for a flavour. `lg` is the 1200px version for hero-sized use. */
+export function cookieSrc(id: string, size: 'sm' | 'lg' = 'sm'): string {
+  return `/cookies/${id}${size === 'lg' ? '-lg' : ''}.webp`
+}
 
 export const TIME_SLOTS = ['10am – 12pm', '12pm – 2pm', '2pm – 4pm', '4pm – 6pm'] as const
 
@@ -131,13 +107,14 @@ function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60_000).toISOString()
 }
 
-function item(flavourId: string, qty: number) {
-  const flavour = FLAVOURS.find((f) => f.id === flavourId)
-  if (!flavour) throw new Error(`Unknown flavour ${flavourId}`)
-  return { flavourId, name: flavour.name, qty }
+function box(size: BoxSize, items: Array<[string, number]>): OrderBox {
+  return {
+    size,
+    items: items.map(([flavourId, qty]) => ({ flavourId, name: flavourById(flavourId)?.name ?? flavourId, qty })),
+  }
 }
 
-/** Seed queue for the dashboard. Fictional first names only. */
+/** Seed queue for the kitchen board. Fictional first names only. */
 export function seedOrders(): PlacedOrder[] {
   const today = isoDate(new Date())
   return [
@@ -146,18 +123,12 @@ export function seedOrders(): PlacedOrder[] {
       ref: 'CD-1041',
       name: 'Mabel',
       createdAt: minutesAgo(18),
-      boxSize: 6,
-      items: [
-        item('classic-chocolate', 2),
-        item('red-velvet', 2),
-        item('biscoff', 1),
-        item('oreo', 1),
-      ],
+      boxes: [box(6, [['classic-chocolate', 2], ['red-velvet', 2], ['biscoff', 1], ['oreo', 1]])],
       mode: 'pickup',
       area: '',
       date: today,
       slot: '12pm – 2pm',
-      note: 'One red velvet is a gift — could it be boxed on its own?',
+      note: 'One red velvet is a gift. Could it be wrapped on its own?',
       total: 35,
       stage: 'new',
     },
@@ -166,12 +137,7 @@ export function seedOrders(): PlacedOrder[] {
       ref: 'CD-1040',
       name: 'Theo',
       createdAt: minutesAgo(38),
-      boxSize: 4,
-      items: [
-        item('lemon-cheesecake', 1),
-        item('white-kitkat', 1),
-        item('reese-s', 2),
-      ],
+      boxes: [box(4, [['lemon-cheesecake', 1], ['white-kitkat', 1], ['reese-s', 2]])],
       mode: 'delivery',
       area: 'Brunswick',
       date: today,
@@ -185,20 +151,21 @@ export function seedOrders(): PlacedOrder[] {
       ref: 'CD-1039',
       name: 'Ari',
       createdAt: minutesAgo(62),
-      boxSize: 12,
-      items: [
-        item('classic-chocolate', 2),
-        item('red-velvet', 2),
-        item('lemon-cheesecake', 2),
-        item('biscoff', 2),
-        item('white-kitkat', 2),
-        item('reese-s', 2),
+      boxes: [
+        box(12, [
+          ['classic-chocolate', 2],
+          ['red-velvet', 2],
+          ['lemon-cheesecake', 2],
+          ['biscoff', 2],
+          ['white-kitkat', 2],
+          ['reese-s', 2],
+        ]),
       ],
       mode: 'pickup',
       area: '',
       date: today,
       slot: '4pm – 6pm',
-      note: 'Birthday box — extra sprinkles if there are any going.',
+      note: 'Birthday box.',
       total: 66,
       stage: 'baking',
     },
@@ -207,8 +174,7 @@ export function seedOrders(): PlacedOrder[] {
       ref: 'CD-1038',
       name: 'Juno',
       createdAt: minutesAgo(94),
-      boxSize: 6,
-      items: [item('biscoff', 3), item('oreo', 3)],
+      boxes: [box(6, [['biscoff', 3], ['oreo', 3]])],
       mode: 'delivery',
       area: 'Footscray',
       date: today,

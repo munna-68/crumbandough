@@ -84,9 +84,23 @@ export function makeRef(taken: Set<string>): string {
 }
 
 export function orderSummary(order: PlacedOrder): string {
-  return order.items
-    .map((i) => `${i.qty} ${i.name.toLowerCase()}`)
-    .join(', ')
+  return order.boxes
+    .map((b) => b.items.map((i) => `${i.qty} ${i.name.toLowerCase()}`).join(', '))
+    .join(' + ')
+}
+
+export function orderCookies(order: PlacedOrder): number {
+  return order.boxes.reduce((a, b) => a + b.items.reduce((s, i) => s + i.qty, 0), 0)
+}
+
+export function dayLabel(iso: string): string {
+  const today = isoDate(new Date())
+  if (iso === today) return 'today'
+  const t = new Date()
+  t.setDate(t.getDate() + 1)
+  if (iso === isoDate(t)) return 'tomorrow'
+  const d = new Date(`${iso}T12:00:00`)
+  return d.toLocaleDateString('en-AU', { weekday: 'long' })
 }
 
 export function prefersReducedMotion(): boolean {

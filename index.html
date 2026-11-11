@@ -3,32 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4e8d7" />
+    <meta name="theme-color" content="#F3C6DD" />
     <title>crumb and dough — chunky, gooey cookies in Melbourne</title>
     <meta
       name="description"
-      content="Chunky, gooey and homemade cookies, baked in small batches in Melbourne. Seven flavours, boxes of four, six or twelve, pickup or delivery. Concept demo."
+      content="Chunky, gooey and homemade cookies from Melbourne. Seven stuffed flavours in boxes of four, six or twelve, for pick up or delivery. Concept site."
     />
     <meta property="og:site_name" content="crumb and dough" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="crumb and dough — chunky, gooey cookies in Melbourne" />
-    <meta
-      property="og:description"
-      content="Seven stuffed flavours, boxes of four, six or twelve, mixed and matched. A concept shop and kitchen dashboard."
-    />
+    <meta property="og:description" content="Seven stuffed flavours, boxes of four, six or twelve. Build your box." />
     <meta name="robots" content="noindex, nofollow" />
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23382017'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23f1c5d8'/%3E%3Cellipse cx='12.5' cy='13' rx='2' ry='1.6' fill='%234a2b1e' transform='rotate(-24 12.5 13)'/%3E%3Cellipse cx='19' cy='15' rx='2.2' ry='1.7' fill='%234a2b1e' transform='rotate(-8 19 15)'/%3E%3Cellipse cx='15' cy='20' rx='2.1' ry='1.6' fill='%234a2b1e' transform='rotate(28 15 20)'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%234A2B1E'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='Arial Black,Arial' font-weight='900' font-size='13' fill='%23F3C6DD'%3Ec%26d%3C/text%3E%3C/svg%3E"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Outfit:wght@300..900&display=swap"
       rel="stylesheet"
     />
+    <link rel="preload" as="image" href="/cookies/oreo-lg.webp" type="image/webp" />
+    <script>
+      // Decide before first paint whether the bite intro will play, so the boot cover never flashes for return visits.
+      ;(function () {
+        try {
+          var q = new URLSearchParams(location.search).get('intro')
+          var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+          var seen = sessionStorage.getItem('crumbandough.intro.v1') === '1'
+          if (q === '0' || (q !== '1' && (seen || reduce))) document.documentElement.classList.add('no-intro')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
+    <div id="boot" aria-hidden="true">
+      <span>crumb and dough</span>
+      <span>MEL | AUS</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

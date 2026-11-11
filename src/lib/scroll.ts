@@ -71,6 +71,23 @@ export function scrollToHash(hash: string) {
   return true
 }
 
+let locks = 0
+
+/** Freeze page scroll under a dialog or transition. Nested calls are counted. */
+export function lockScroll() {
+  locks += 1
+  if (locks > 1) return
+  lenis?.stop()
+  document.documentElement.classList.add('is-locked')
+}
+
+export function unlockScroll() {
+  locks = Math.max(0, locks - 1)
+  if (locks > 0) return
+  lenis?.start()
+  document.documentElement.classList.remove('is-locked')
+}
+
 export function refreshScroll() {
   ScrollTrigger.refresh()
 }

@@ -1,127 +1,189 @@
-# Video notes — Crumb and Dough concept walkthrough
+# Video notes: crumb and dough, the unasked-for website
 
-A one-minute screen recording of the concept site. Record at **1440 × 900**, browser zoom **100%**, no bookmarks bar, notifications off. Use a clean browser profile and start on the home page.
+Notes for the episode "building small businesses a website without being asked". This is the second version of the concept: a full redesign in a flat-colour, studio still-life style, with chocolate brown and baby pink taken from the shop's Instagram badge, and the cookie picker ported from the Bake House build.
 
-## The concept in two lines
-
-> A warm, tactile shopfront for a Melbourne cookie business that only exists in DMs — rebuilt as a real ordering flow.
-> Chunky type, gooey cookies, and a kitchen board that updates the moment a box is sent.
+Record at **1440 × 900**, browser zoom **100%**, no bookmarks bar, notifications off. For the phone segment use a **375 × 812** viewport (Chrome device toolbar, iPhone 12/13 mini size is fine).
 
 ---
 
-## 1. Before you record
+## 1. The idea in two lines
 
-- Start the site with `npm run dev` and open the URL it prints (or `npm run preview` after a build).
-- Force the intro once with `http://localhost:5173/?intro=1`. It plays for about **2.8 seconds** and then wipes into the hero.
-- `?intro=0` skips the intro. Without either flag it plays **once per browser session** on the home page only.
-- If you need to retake the order section without re-filling, `/order?box=6` preselects the six-cookie box. For the final take, use the normal wipe from the home page instead.
-- `?labels=1` shows the image-slot QA labels. **Do not record with labels on.**
-- Use a fresh private window if you want the intro to replay without the query flag.
-- Rehearse the scroll once. The pinned flavour section is scrubbed by scroll: slow, steady scrolling reads best. Fast flicks make it jump.
-- Move the cursor deliberately and pause before clicks. The circular wipe starts from the exact click point.
+> A Melbourne cookie shop that only takes orders in DMs, given a shopfront that feels like their Instagram: pink, brown, chunky and a bit cheeky.
+> You build a box like you'd fill a real one, and the order lands on a kitchen board the moment you send it.
 
 ---
 
-## 2. Recording order — 60 seconds
+## 2. Before you record
+
+- `npm run dev` serves the site at **http://127.0.0.1:5188**.
+- **`/?intro=1`** forces the preloader. **`/?intro=0`** skips it. Without a flag it plays once per browser tab session.
+- **`/shop?size=4`**, **`?size=6`**, **`?size=12`** preselect a box size.
+- **`/shop?add=red-velvet`** drops one cookie into the box (any flavour id works: `classic-chocolate`, `red-velvet`, `lemon-cheesecake`, `biscoff`, `white-kitkat`, `reese-s`, `oreo`).
+- The box you are building is saved in localStorage. For a clean take, empty it first (or run `localStorage.clear()` in the console).
+- Placed orders live in memory only. Refresh and the kitchen board goes back to the four seeded orders.
+- **Scroll slowly through the flavour section.** It is pinned and scrubbed by scroll; a steady scroll reads best, a fast flick jumps two flavours at once.
+- Move the cursor deliberately and pause before clicks. Every page change runs the chocolate drip transition, so you never need a hard cut between pages.
+
+---
+
+## 3. The features, one by one
+
+### 3.1 The bite preloader (about 4 seconds)
+
+The screen is baby pink. The brand badge (cocoa circle, pink "crumb AND dough" wordmark) plops in, and a counter ticks from 00 to 100 under phrases that rotate: *preheating the oven, folding in the chunks, underbaking, on purpose, boxing it up*.
+
+As the counter climbs, **three bites get taken out of the badge's edge**. Each bite is a scalloped hole made of three circles, with a little wobble and a burst of crumbs that fall with gravity. At 100 a cocoa circle floods the screen, then **three giant chomps eat through it** (from the right, from the bottom left, then the rest) and the hero is underneath.
+
+How it is built: one SVG with masks. The bites and chomps are black circles inside the mask growing their radius with GSAP; the crumbs are small HTML spans thrown with random velocity. The hero entrance starts on the first chomp, so it is already moving as the screen opens.
+
+> Line to say: "Most loaders are a spinner. This one eats the screen."
+
+### 3.2 The chocolate drip page transition (about 2 seconds)
+
+Click any internal link: a cocoa sheet falls from the top with a **dripping, melted edge**. The destination name rises in the middle ("build a box", "the kitchen", "home") with a spinning cookie. The route changes behind it, then the sheet lifts away while the drips stretch long, like chocolate pulled off a spoon.
+
+> Line: "Even the page change is on brand. It's melted chocolate."
+
+### 3.3 The hero still life
+
+The reference had studio product shots on coloured plinths. Without real photos, the site **builds that still life in code**: an arch, five plinths (rose, milk, pink, cocoa, butter), spheres and six real cookie cutouts standing on top.
+
+- On entry the plinths grow up from the floor, the cookies drop in with a spin, the spheres bounce, and the headline "Chunky, gooey, homemade." rises letter by letter out of a mask.
+- Scroll moves each object at its own depth (parallax), and moving the mouse shifts them sideways a little.
+- When the generated hero photos arrive (see IMAGE_PROMPTS.md) they swap in automatically, desktop and mobile separately.
+
+### 3.4 SHOP: 4 / 6 / 12
+
+Straight from the reference layout: a centred coloured title and three products, each with a **giant numeral behind it**. Here the numbers are the real box sizes: 4 (Mondays and Tuesdays, A$24), 6 (every day, A$35) and 12. As you scroll the numerals swell and the cookies roll in. Each one opens the builder with that size already picked.
+
+### 3.5 The story sentence
+
+A cocoa section with one big pink sentence that **lights up word by word as you scroll**, with little cookie "pills" set inline in the text, then three short facts.
+
+### 3.6 The flavour roll (the theatrical bit)
+
+The section pins for seven screens. Each scroll step **rolls the current cookie off to the left and the next one in from the right**, the whole wall repaints in that flavour's colour, the name swaps line by line, and a counter and dots track where you are. Each flavour has an "Add to a box" button that opens the builder with that cookie already in.
+
+> Line: "Seven flavours, one scroll each. The wall changes colour to match the cookie."
+
+### 3.7 INSTAGRAM and CONTACT
+
+Five post tiles in a row, like the reference, designed in CSS from the shop's real offers (red velvet, 4 for $24, 6 for $35, Biscoff, "DM us"). They reveal with a clip-path wipe. On a phone they scroll sideways. Then a butter-coloured contact band: DM on Instagram, TikTok, Melbourne pick up or delivery.
+
+### 3.8 Footer
+
+A light pink footer with a small still life of its own, the concept disclaimer, and a giant "crumb and dough" wordmark that rises as you reach the bottom.
+
+### 3.9 The box builder (ported from Bake House)
+
+The best part of the earlier Bake House build, moved over and restyled. **It is a different layout on desktop and phone, on purpose.**
+
+**Desktop**
+- A sticky cocoa panel on the left: pick 4, 6 or 12, see the round slots of your box, a running total, and the checkout button.
+- The flavour grid on the right. Tap **Add** and the cookie **flies from the card into the next empty slot** in the box, then pops in.
+- Changing the box size keeps the cookies that still fit.
+- "Add another box" for up to four boxes, each with its own tab.
+- The checkout button tells you when there is still room: "Check out with 4", "2 more fit at no extra cost".
+
+**Phone**
+- The box becomes a **sticky strip** under the page header (it slides up when the nav hides), so the slots stay in view while you scroll the flavours.
+- A **bottom bar** with the count, total and "Review order".
+- "Review order" opens a **bottom sheet** listing every box with steppers, so you can edit without leaving the page.
+- A toast tells you when a box is full.
+
+> Line: "On a laptop you get a panel. On a phone the box follows you down the page. Same order, two different layouts."
+
+### 3.10 Checkout in three steps
+
+1. **How do you want it?** Pick up (free) or delivery (suburb only, no street address), a day from the next five, and a two-hour window.
+2. **Who's it for?** A name, an Instagram handle or mobile number, and an optional note for the kitchen.
+3. **Check it.** Every box and cookie, the total, and a plain note that payment happens over DM, like the shop does today. Then **Send to the kitchen**.
+
+The confirmation stamps in with a reference number (CD-1xxx) and a button to see it on the kitchen board.
+
+### 3.11 The kitchen board
+
+`/kitchen` is the back of house. Your order arrives **at the top with a "Just in" banner**, alongside four seeded orders. It shows:
+- open orders, cookies to bake, deliveries, and the total on the board
+- the queue, where tapping moves an order New → Baking → Ready
+- a **bake list** that adds up every open order per flavour, with bars that grow in
+
+> Line: "The customer taps a button, and the baker gets a bake list. That's the whole pitch."
+
+### 3.12 The details nobody sees
+
+- **Reduced motion is respected.** With "reduce motion" on, the preloader is skipped, the flavour roll becomes a plain grid, and all text simply appears.
+- Smooth scrolling (Lenis) with the page locked while dialogs are open.
+- The nav hides when you scroll down and comes back when you scroll up; the phone strip moves up to fill the gap.
+- Two quick taps can't overfill a box (the store updates synchronously).
+- Keyboard: dialogs trap focus, Escape closes them, a screen-reader live region announces toasts.
+
+---
+
+## 4. Suggested shot list, about 75 seconds
 
 | Time | On screen | Action | Voiceover |
 | --- | --- | --- | --- |
-| 0:00–0:03 | Preloader | Start on `/?intro=1`. Let the dough ball, chips, flatten and cookie circle play. | "Every box starts with dough." / "And a little chocolate." |
-| 0:03–0:09 | Hero | Let the line-mask title and cookie settle. Small scroll to the price line. | "Chunky, gooey, homemade — your next cookie obsession." |
-| 0:09–0:13 | Offers strip | Scroll once, slowly, past the six-for-$35 and four-for-$24 cards. | "Six for thirty-five every day. Four for twenty-four on Mondays and Tuesdays." |
-| 0:13–0:23 | Flavour roll | Scroll steadily through all seven flavours. Let the rotation and cards do the work. | "Seven flavours. Mix and match, or commit to one." |
-| 0:23–0:27 | Reviews | Pause on the review themes and the kitchen still. | "The kind of cookie people text you about." |
-| 0:27–0:30 | Closing CTA | Land on "hungry yet?" | "Packed by hand, picked up or delivered across Melbourne." |
-| 0:30–0:33 | Circular wipe | Click **build your box**. The circle opens from the cursor and closes on the order page. | "So let's build a box." |
-| 0:33–0:40 | Order, size + flavours | Six is preselected. Add six cookies across two or three flavours; let the live platter fill. | "Pick a size, then fill it. The box fills as you tap." |
-| 0:40–0:46 | Details | Type a first name. Switch to **delivery**, type an area only (e.g. Brunswick). Pick a day and a time. | "Pickup or Melbourne metro. Area only — no street address." |
-| 0:46–0:49 | Place order | Click **place order**. Hold on the confirmation entrance. | "One tap, and the kitchen has it." |
-| 0:49–0:53 | Confirmation | Let the cookie check, burst and summary settle. | "A proper confirmation. No payment, because this is a concept." |
-| 0:53–1:00 | Kitchen board | Click **open the kitchen board**. Hold on the new order at the top, the "just in" tag, the stats and bake list. | "The order lands at the top of the queue, and the bake list counts itself." |
-
-**If you need a calmer cut:** hold two extra seconds on the hero and two on the confirmation, and trim the reviews pause. The story still lands at about **68 seconds**.
-
-### Preloader line — say it slowly
-
-> "Every box starts with dough. And a little chocolate."
-
-The visual is: dough ball → chips drop → flatten → cookie → a circle expands into the hero. Do not talk over the last half-second; let the wipe land.
-
-### Transition line — say it as you click
-
-> "So let's build a box."
-
-The wipe is under **0.9 seconds**, from the click point. Do not add a cut; the transition is the edit.
+| 0:00–0:05 | Preloader | Open `/?intro=1`. Hands off. | "Most loaders are a spinner. This one eats the screen." |
+| 0:05–0:10 | Hero | Let the still life build. Wiggle the mouse a little. | "Chunky, gooey, homemade. Their words, not mine." |
+| 0:10–0:15 | SHOP trio | Scroll slowly. | "Three boxes: four, six and twelve. The four is their Monday deal." |
+| 0:15–0:20 | Story | Scroll through the sentence. | "Every word lights up as you read it." |
+| 0:20–0:32 | Flavour roll | Steady scroll through all seven. | "Seven flavours, one scroll each." |
+| 0:32–0:36 | Instagram, contact, footer | One smooth scroll to the bottom. | "Their Instagram, rebuilt as a shopfront." |
+| 0:36–0:39 | Drip transition | Scroll back up, click **Build your box**. | "Even the page change is melted chocolate." |
+| 0:39–0:48 | Builder (desktop) | Pick 6. Add three or four flavours, watch them fly in. | "Tap a cookie, it flies into the box." |
+| 0:48–0:56 | Checkout | Delivery, a suburb, a day, a window; a name; send. | "Three steps. No account, no card. Payment stays in the DMs." |
+| 0:56–1:02 | Kitchen | Click **See it on the kitchen board**. Hold on "Just in" and the bake list. | "And the baker gets a bake list." |
+| 1:02–1:15 | Phone | Switch to the 375 px view. `/shop`: add a few, show the sticky strip, bottom bar and review sheet. | "On a phone it's a different layout. The box follows you down the page." |
 
 ---
 
-## 3. Five talking points
+## 5. Five talking points
 
-Use these if you are narrating live or writing the post caption.
-
-1. **It is built from the real business, not a generic bakery template.** The words are theirs — "chunky, gooey and homemade", "your next cookie obsession", "zero self-control" — and the two hero offers are the public ones: six for A$35 every day, four for A$24 on Mondays and Tuesdays. There was no official website to redesign, so this is a concept built from the Instagram presence, not a redesign claim.
-
-2. **The flavour roll is the signature moment.** Seven flavours sit in a pinned horizontal roll, with the cards' rotation tied to scroll. It turns a menu into the reason to keep scrolling, and it is the one place where the site is allowed to be theatrical.
-
-3. **Ordering feels like filling a box, not filling a form.** Choose four, six or twelve; tap flavours up and down; watch the circular platter fill. Pickup or delivery, area only, date and time, an optional kitchen note. No payment, no pretence.
-
-4. **The kitchen board closes the loop.** Placing an order drops it at the top of the queue with a "just in" tag, then recalculates the stats and the per-flavour bake list. The seeded queue is fictional, but the behaviour is the real product idea.
-
-5. **The polish is deliberately uneven.** The preloader, hero, order submit and first dashboard moment get the motion budget. Offers, reviews and footer stay quiet. That restraint is what makes the loud bits feel expensive.
+1. **It's their brand, not a template.** The colours come straight off their Instagram badge: chocolate brown and baby pink. The words are theirs ("chunky, gooey and homemade"). The two real offers (6 for A$35 every day, 4 for A$24 on Mondays and Tuesdays) are the hero products.
+2. **The design came from one reference image.** Flat colour fields, still life on plinths, centred coloured section titles, giant numerals behind products, a row of Instagram tiles, a butter contact band. I copied the design language, not the content.
+3. **The loud bits are on purpose.** The preloader, the drip transition and the flavour roll get the motion. The rest stays calm, which is what makes those three moments land.
+4. **The ordering flow was reused, not rebuilt.** The Bake House box builder already worked well, so it was ported and restyled. That is the real lesson for small-business sites: a good flow is reusable.
+5. **The kitchen board is the pitch.** The customer doesn't care about the back end, but the owner does. Showing their DMs turning into a bake list is what sells it.
 
 ---
 
-## 4. What is fake
+## 6. What's fake
 
-Be straightforward about this if anyone asks. The demo is honest in the UI, and the notes should be too.
+Say this plainly if anyone asks.
 
-- **Every order is fictional.** The four seeded orders (Mabel, Theo, Ari, Juno) and anything placed during the demo live in React state only. Refresh the page and the queue resets.
-- **The dashboard is not connected to anything.** No database, no auth, no real-time sync, no printing, no notifications.
-- **All prices are placeholders.** The A$35 six-box and A$24 four-box match public Instagram captions. The A$66 twelve-box and A$8 delivery fee are invented, and every price on screen is tagged "placeholder price" or "placeholder".
-- **Dates and times are placeholders.** The next five days and the 10am–6pm windows are generated for the demo; they are not the kitchen's real hours.
-- **Delivery is area-only by design.** Brunswick and Footscray are example suburbs, not a service map. There is no address lookup, minimum order or delivery-radius check.
-- **There is no pickup address, phone number or email.** Pickup copy says the exact spot is confirmed after ordering, because the real address is not public.
-- **The reviews are brand-voice themes, not real customer quotes.** No customer names, avatars or star ratings are invented. The real REVIEWS highlight sits behind an Instagram login wall.
-- **All photography is a branded placeholder.** The `c+d` marks are intentional; no real Crumb and Dough photos, logos or packaging are used.
-- **No payment, email, SMS or backend.** The confirmation says so explicitly.
-- **The Instagram and TikTok links are real**, but this site is not affiliated with or endorsed by the business.
+- **The cookie photos are borrowed** from the Bake House concept and mapped onto crumb and dough's real flavour names. They are stand-ins until real photos are shot. None are the shop's own photos.
+- **Every order is fictional.** The seeded orders (Mabel, Theo, Ari, Juno) and anything you place live in memory only. Refresh and the board resets.
+- **No back end.** No database, payments, login, email, SMS or real-time sync.
+- **Some prices are made up.** A$35 for six and A$24 for four match their public posts. A$66 for twelve and the A$8 delivery fee are placeholders, and the footer says so.
+- **Days and time windows are generated** (the next five days, 10am to 6pm). They are not the shop's real hours.
+- **Delivery is suburb only** with no zone check.
+- **The Instagram tiles are designed, not real posts.**
+- **The Instagram and TikTok links are real**, but the site is not affiliated with or endorsed by the business, and the page is set to `noindex`.
 
 ---
 
-## 5. What a real version needs
+## 7. What a real version needs
 
-**Content and trust**
-- A real photo set for all fourteen slots, plus permission for any customer review that is quoted.
-- Confirmed opening and ordering hours, pickup address, delivery suburbs, fee, minimum order and lead time.
-- Ingredient and allergen information, storage and reheating notes, and a food-safety/licensing check.
-- Real terms, privacy, refund and cancellation copy.
-
-**Commerce**
-- A backend with menu, stock, capacity and cutoff rules. The current box builder assumes every flavour is always available.
-- Payments (Stripe, Square or similar), order confirmation by email/SMS, and a real order reference.
-- Delivery-zone validation rather than a free-text area field.
-- A kitchen dashboard with authentication, roles, status changes, print tickets, and a proper bake list export.
-- Persistence and real-time updates. The concept deliberately holds orders in browser memory.
-
-**Craft and operations**
-- Domain, hosting, analytics with consent, error monitoring and backups.
-- Remove `noindex`, add real metadata, Open Graph images, sitemap and robots.
-- Accessibility audit with keyboard and screen-reader testing; the concept already respects reduced motion and has skip links.
-- Performance pass on the real image set, plus a content workflow for specials and seasonal drops.
-- A social plan that connects the site back to the DM ordering habit the business already has.
+- Real photos: hero (desktop and mobile), footer still life, and one transparent cutout per flavour (prompts in IMAGE_PROMPTS.md).
+- Confirmed prices, hours, pick-up spot, delivery suburbs, fee, minimum order and lead time.
+- Allergen and ingredient info per flavour.
+- A back end for stock and daily capacity, real payments, order emails or texts, and a logged-in kitchen board.
+- Hosting, a domain, analytics with consent, and removing `noindex`.
 
 ---
 
-## 6. Research gaps
+## 8. Where things live in the code
 
-These were **not public** at the time of research (10 November 2026) and are represented as placeholders or omitted:
-
-- Actual review text — the Instagram REVIEWS highlight is behind a login wall.
-- The owner's first name — not in the bio, captions or metadata.
-- Opening, baking and ordering hours.
-- Delivery fee, suburb list, delivery minimum and cutoff.
-- Pickup address.
-- An official website — none was found. The only external link in the bio is TikTok.
-- Baking days beyond the public Monday/Tuesday four-box offer.
-
-Do not fill these gaps with confident-sounding invented facts in the voiceover. Say "placeholder" when you mean it.
+| Feature | File |
+| --- | --- |
+| Bite preloader | `src/components/Preloader.tsx` |
+| Drip transition | `src/components/Transition.tsx` |
+| Nav, phone menu, toasts, bottom bar | `src/components/Chrome.tsx` |
+| Hero and still-life kit | `src/components/home/Hero.tsx`, `src/components/home/Scene.tsx` |
+| SHOP trio, story, flavour roll, Instagram, contact | `src/components/home/*` |
+| Box builder, flavour grid, review sheet, checkout | `src/components/shop/*` |
+| Kitchen board | `src/pages/Kitchen.tsx` |
+| Store (boxes, orders, checkout state) | `src/lib/store.tsx` |
+| Flavours, prices, seeded orders | `src/lib/data.ts` |
+| Photo slots for generated images | `src/lib/photos.ts` |

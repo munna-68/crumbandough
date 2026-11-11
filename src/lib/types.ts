@@ -4,48 +4,53 @@ export type BoxSize = (typeof BOX_SIZES)[number]
 export type FulfilmentMode = 'pickup' | 'delivery'
 export type OrderStage = 'new' | 'baking' | 'ready'
 
-export type FlavourSlot =
-  | 'classic-chocolate'
-  | 'red-velvet'
-  | 'lemon-cheesecake'
-  | 'biscoff'
-  | 'white-kitkat'
-  | 'reese-s'
-  | 'oreo'
-
 export interface Flavour {
   id: string
   name: string
+  /** One line, in the shop's own voice. */
   desc: string
-  /** Short, human note used in the box preview and kitchen list. */
+  /** Short nickname used on the flavour stage and kitchen board. */
   note: string
+  /** Pastel ground used behind this cookie on the flavour stage. */
+  tint: string
+  /** Solid accent for bars and dots. */
   accent: string
-  imageSlot: FlavourSlot
+  allergens: string[]
 }
 
 export interface BoxOption {
   size: BoxSize
   name: string
-  blurb: string
   price: number
-  badge?: string
+  /** When the offer runs, in plain words. */
+  when: string
+  numeral: string
 }
 
-export interface OrderItem {
-  flavourId: string
-  name: string
-  qty: number
+export interface Box {
+  id: string
+  size: BoxSize
+  /** flavourId -> quantity */
+  items: Record<string, number>
 }
 
-export interface OrderDraft {
-  boxSize: BoxSize
-  counts: Record<string, number>
+export interface Fulfilment {
   mode: FulfilmentMode
-  name: string
+  day: string
+  window: string | null
+  /** Suburb only — never a street address. */
   area: string
-  date: string
-  slot: string
+}
+
+export interface Customer {
+  name: string
+  contact: string
   note: string
+}
+
+export interface OrderBox {
+  size: BoxSize
+  items: Array<{ flavourId: string; name: string; qty: number }>
 }
 
 export interface PlacedOrder {
@@ -53,8 +58,7 @@ export interface PlacedOrder {
   ref: string
   name: string
   createdAt: string
-  boxSize: BoxSize
-  items: OrderItem[]
+  boxes: OrderBox[]
   mode: FulfilmentMode
   area: string
   date: string
@@ -64,21 +68,8 @@ export interface PlacedOrder {
   stage: OrderStage
 }
 
-export interface BakeRow {
-  flavourId: string
-  name: string
-  qty: number
-  accent: string
-}
-
-export interface ReviewTheme {
-  quote: string
-  detail: string
-}
-
-export interface Offer {
-  eyebrow: string
-  title: string
-  detail: string
-  price: number
+export interface Toast {
+  id: number
+  message: string
+  tone: 'default' | 'full'
 }

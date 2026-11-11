@@ -1,43 +1,23 @@
-import { useCallback, useState } from 'react'
-import { markIntroPlayed, shouldPlayIntro } from '../lib/intro'
-import { SiteFooter, SiteHeader } from '../components/Chrome'
-import { CtaBand } from '../components/CtaBand'
-import { FlavourRoll } from '../components/FlavourRoll'
-import { Hero } from '../components/Hero'
-import { OffersStrip } from '../components/OffersStrip'
-import { Preloader } from '../components/Preloader'
-import { ReviewsStrip } from '../components/ReviewsStrip'
+import { Footer } from '../components/Footer'
+import { Contact } from '../components/home/Contact'
+import { FlavourStage } from '../components/home/FlavourStage'
+import { Hero } from '../components/home/Hero'
+import { Instagram } from '../components/home/Instagram'
+import { ShopTrio } from '../components/home/ShopTrio'
+import { Statement } from '../components/home/Statement'
 
 export function Home() {
-  const [playIntro] = useState(() => shouldPlayIntro())
-  const [showPreloader, setShowPreloader] = useState(playIntro)
-  const [introDone, setIntroDone] = useState(!playIntro)
-
-  const handleReveal = useCallback(() => setIntroDone(true), [])
-  const handleDone = useCallback(() => {
-    markIntroPlayed()
-    setIntroDone(true)
-    setShowPreloader(false)
-  }, [])
-
   return (
-    <div className="home">
-      <a className="skip-link" href="#main">
-        skip to the cookies
-      </a>
-      {showPreloader && <Preloader onReveal={handleReveal} onDone={handleDone} />}
-
-      <SiteHeader />
-
+    <>
       <main id="main">
-        <Hero start={introDone} />
-        <OffersStrip />
-        <FlavourRoll />
-        <ReviewsStrip />
-        <CtaBand />
+        <Hero />
+        <ShopTrio />
+        <Statement />
+        <FlavourStage />
+        <Instagram />
+        <Contact />
       </main>
-
-      <SiteFooter />
-    </div>
+      <Footer />
+    </>
   )
 }
