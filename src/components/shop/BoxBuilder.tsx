@@ -79,7 +79,13 @@ export function SlotGrid({ box, variant }: { box: Box; variant: 'panel' | 'strip
         const id = filled[i]
         const f = id ? FLAVOURS.find((x) => x.id === id) : undefined
         return (
-          <li key={i} className={`slot ${f ? 'is-filled' : ''}`} data-slot-index={live ? i : undefined} data-slot-variant={variant}>
+          <li
+            key={i}
+            className={`slot ${f ? 'is-filled' : ''}`}
+            data-n={i + 1}
+            data-slot-index={live ? i : undefined}
+            data-slot-variant={variant}
+          >
             {f ? (
               <>
                 <span className="slot__cookie">

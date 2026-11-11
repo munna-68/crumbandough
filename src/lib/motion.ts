@@ -1,11 +1,12 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SplitText } from 'gsap/SplitText'
+import { Flip } from 'gsap/Flip'
 import { useGSAP } from '@gsap/react'
 
-gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP)
+gsap.registerPlugin(ScrollTrigger, SplitText, Flip, useGSAP)
 
-export { gsap, ScrollTrigger, SplitText, useGSAP }
+export { gsap, ScrollTrigger, SplitText, Flip, useGSAP }
 
 export const REDUCED = '(prefers-reduced-motion: reduce)'
 export const MOTION = '(prefers-reduced-motion: no-preference)'

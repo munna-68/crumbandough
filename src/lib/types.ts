@@ -2,7 +2,7 @@ export const BOX_SIZES = [4, 6, 12] as const
 export type BoxSize = (typeof BOX_SIZES)[number]
 
 export type FulfilmentMode = 'pickup' | 'delivery'
-export type OrderStage = 'new' | 'baking' | 'ready'
+export type OrderStage = 'new' | 'baking' | 'ready' | 'done'
 
 export interface Flavour {
   id: string

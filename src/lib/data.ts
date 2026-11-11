@@ -46,15 +46,6 @@ export const FLAVOURS: Flavour[] = [
     allergens: ['Wheat', 'Milk', 'Egg'],
   },
   {
-    id: 'lemon-cheesecake',
-    name: 'Lemon cheesecake',
-    desc: 'Buttery lemon cookie with a smooth, creamy cheesecake filling.',
-    note: 'the bright one',
-    tint: '#F5E3A8',
-    accent: '#C9A13A',
-    allergens: ['Wheat', 'Milk', 'Egg'],
-  },
-  {
     id: 'biscoff',
     name: 'Biscoff',
     desc: 'Biscoff filled, topped with crunchy crumbs and an extra spoon of spread.',
@@ -89,6 +80,15 @@ export const FLAVOURS: Flavour[] = [
     tint: '#D9C6C9',
     accent: '#3E2A22',
     allergens: ['Wheat', 'Milk', 'Soy'],
+  },
+  {
+    id: 'toasted-marshmallow',
+    name: 'Toasted marshmallow',
+    desc: 'Brown butter dough, a torched marshmallow centre, caramel pockets and a biscuit crumble.',
+    note: 'the campfire one',
+    tint: '#EBD9C6',
+    accent: '#B0703A',
+    allergens: ['Wheat', 'Milk', 'Egg'],
   },
 ]
 
@@ -137,7 +137,7 @@ export function seedOrders(): PlacedOrder[] {
       ref: 'CD-1040',
       name: 'Theo',
       createdAt: minutesAgo(38),
-      boxes: [box(4, [['lemon-cheesecake', 1], ['white-kitkat', 1], ['reese-s', 2]])],
+      boxes: [box(4, [['toasted-marshmallow', 1], ['white-kitkat', 1], ['reese-s', 2]])],
       mode: 'delivery',
       area: 'Brunswick',
       date: today,
@@ -155,7 +155,7 @@ export function seedOrders(): PlacedOrder[] {
         box(12, [
           ['classic-chocolate', 2],
           ['red-velvet', 2],
-          ['lemon-cheesecake', 2],
+          ['toasted-marshmallow', 2],
           ['biscoff', 2],
           ['white-kitkat', 2],
           ['reese-s', 2],
@@ -184,4 +184,37 @@ export function seedOrders(): PlacedOrder[] {
       stage: 'ready',
     },
   ]
+}
+
+const SIM_NAMES = ['Priya', 'Sam', 'Lena', 'Kofi', 'Hana', 'Leo', 'Mia', 'Ollie', 'Zara', 'Jack', 'Noor', 'Eli']
+const SIM_AREAS = ['Brunswick', 'Fitzroy', 'Footscray', 'Carlton', 'Richmond', 'Northcote', 'Coburg']
+const SIM_NOTES = ['', '', '', 'Happy birthday Ruby!', 'Extra napkins please.', 'Ring the bell twice.', 'A gift, no prices in the box.']
+
+/** A believable random order for the kitchen board's "simulate" button. */
+export function randomOrder(ref: string): PlacedOrder {
+  const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)]
+  const size = pick([4, 6, 6, 6, 12] as const)
+  const counts = new Map<string, number>()
+  const menu = FLAVOURS.slice().sort(() => Math.random() - 0.5).slice(0, size === 4 ? 2 : 3)
+  for (let i = 0; i < size; i++) {
+    const f = pick(menu)
+    counts.set(f.id, (counts.get(f.id) ?? 0) + 1)
+  }
+  const mode = Math.random() < 0.4 ? 'delivery' : 'pickup'
+  const now = new Date().getHours()
+  const slots = TIME_SLOTS.filter((_, i) => 10 + i * 2 + 2 > now)
+  return {
+    id: `sim-${Date.now().toString(36)}`,
+    ref,
+    name: pick(SIM_NAMES),
+    createdAt: new Date().toISOString(),
+    boxes: [box(size, [...counts.entries()])],
+    mode,
+    area: mode === 'delivery' ? pick(SIM_AREAS) : '',
+    date: isoDate(new Date()),
+    slot: pick(slots.length ? slots : TIME_SLOTS),
+    note: pick(SIM_NOTES),
+    total: BOX_PRICES[size] + (mode === 'delivery' ? DELIVERY_FEE : 0),
+    stage: 'new',
+  }
 }

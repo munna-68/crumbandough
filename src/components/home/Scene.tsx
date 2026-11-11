@@ -87,7 +87,7 @@ export function HeroStillLife() {
       {/* front row on the floor */}
       <Plinth x={30} y={-10} w={26} h={7} tone="butter" depth={1.5} />
       <Standing id="reese-s" x={33} y={-3.6} d={12} tilt={-12} depth={1.6} eager />
-      <Standing id="lemon-cheesecake" x={58} y={-10.4} d={11} tilt={14} depth={1.8} eager />
+      <Standing id="toasted-marshmallow" x={58} y={-10.4} d={11} tilt={14} depth={1.8} eager />
       <Sphere x={50} y={-3} d={4.2} tone="cocoa" depth={1.7} />
     </div>
   )

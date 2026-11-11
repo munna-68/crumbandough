@@ -10,7 +10,7 @@ import { SectionTitle } from './SectionTitle'
  */
 const TILES = [
   { tone: 'cocoa', kicker: 'On the menu', title: 'Red velvet', sub: 'with a cheesecake centre', cookies: ['red-velvet'] },
-  { tone: 'pink', kicker: 'Mondays + Tuesdays', title: '4 for $24', sub: 'the little box', cookies: ['lemon-cheesecake', 'oreo'] },
+  { tone: 'pink', kicker: 'Mondays + Tuesdays', title: '4 for $24', sub: 'the little box', cookies: ['toasted-marshmallow', 'oreo'] },
   { tone: 'butter', kicker: 'Every day', title: '6 for $35', sub: 'mix and match', cookies: ['classic-chocolate', 'biscoff', 'reese-s', 'white-kitkat', 'red-velvet', 'oreo'] },
   { tone: 'caramel', kicker: 'The one that drips', title: 'Biscoff', sub: 'extra spread on top', cookies: ['biscoff'] },
   { tone: 'milk', kicker: 'Order', title: 'DM us', sub: BRAND.handle, cookies: ['reese-s'] },

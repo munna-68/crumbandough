@@ -13,13 +13,14 @@ import { prefersReducedMotion } from '../lib/format'
 import { lockScroll, scrollForRoute, unlockScroll } from '../lib/scroll'
 
 /*
- * The chocolate pour. A cocoa sheet with a dripping lower edge falls over the
- * page, the destination's name rises in pink, the route swaps underneath, and
- * the sheet is pulled back up with its drips stretching after it.
+ * The box. Two baby-pink cardboard flaps fold in from the sides (in 3D) and
+ * meet in the middle; the bitten cocoa badge stamps onto the seam like a seal;
+ * the route swaps behind it; then the flaps fold back open and the seal splits
+ * in half along the seam, each half riding away on its flap.
  */
 
 interface TransitionValue {
-  go: (to: string, label?: string) => void
+  go: (to: string) => void
 }
 
 const Ctx = createContext<TransitionValue | null>(null)
@@ -30,67 +31,57 @@ export function useTransition() {
   return ctx
 }
 
-const LABELS: Record<string, string> = {
-  '/': 'home',
-  '/shop': 'build a box',
-  '/kitchen': 'the kitchen',
+/** The seal: the cocoa badge with two bites out of its rim, as in the preloader. */
+function Seal() {
+  return (
+    <svg className="pt__seal-art" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <mask id="pt-bites" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+          <rect width="200" height="200" fill="#fff" />
+          {[
+            [168, 40, 16],
+            [180, 58, 15],
+            [184, 79, 13],
+            [24, 146, 15],
+            [36, 163, 16],
+            [55, 176, 13],
+          ].map(([cx, cy, r], i) => (
+            <circle key={i} cx={cx} cy={cy} r={r} fill="#000" />
+          ))}
+        </mask>
+      </defs>
+      <circle cx="100" cy="100" r="92" className="pt__seal-disc" mask="url(#pt-bites)" />
+      <circle cx="100" cy="100" r="78" className="pt__seal-ring" mask="url(#pt-bites)" />
+      <text x="100" y="92" textAnchor="middle" className="pt__seal-word">
+        crumb
+      </text>
+      <text x="100" y="110" textAnchor="middle" className="pt__seal-and">
+        AND
+      </text>
+      <text x="100" y="140" textAnchor="middle" className="pt__seal-word">
+        dough
+      </text>
+    </svg>
+  )
 }
-
-function labelFor(to: string) {
-  const path = to.split(/[?#]/)[0] || '/'
-  return LABELS[path] ?? 'one sec'
-}
-
-/** A run of chocolate drips along the bottom of a 1440×160 box. */
-function dripPath() {
-  const base = 26
-  const drips: Array<[number, number, number]> = [
-    [70, 26, 54],
-    [210, 34, 104],
-    [330, 22, 40],
-    [470, 30, 82],
-    [640, 40, 126],
-    [790, 24, 48],
-    [930, 32, 96],
-    [1080, 26, 60],
-    [1220, 36, 112],
-    [1360, 24, 44],
-  ]
-  let d = `M0,0 H1440 V${base} `
-  // Walk right-to-left so the shape closes cleanly.
-  for (let i = drips.length - 1; i >= 0; i--) {
-    const [x, w, depth] = drips[i]
-    const r = w * 0.42
-    const y = base + depth
-    d += `L${x + w},${base} `
-    d += `C${x + w * 0.4},${base} ${x + r},${y - depth * 0.55} ${x + r},${y - r} `
-    d += `A${r},${r} 0 0 1 ${x - r},${y - r} `
-    d += `C${x - r},${y - depth * 0.55} ${x - w * 0.4},${base} ${x - w},${base} `
-  }
-  d += `L0,${base} Z`
-  return d
-}
-
-const DRIP = dripPath()
 
 export function TransitionProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const location = useLocation()
   const busy = useRef(false)
-  const sheet = useRef<HTMLDivElement>(null)
-  const label = useRef<HTMLSpanElement>(null)
+  const root = useRef<HTMLDivElement>(null)
   const here = useRef(location.pathname + location.search)
   here.current = location.pathname + location.search
 
   const go = useCallback(
-    (to: string, customLabel?: string) => {
+    (to: string) => {
       if (busy.current) return
       const [path] = to.split('#')
       if (path === here.current || (path === '' && to.startsWith('#'))) {
         scrollForRoute(to)
         return
       }
-      const el = sheet.current
+      const el = root.current
       if (!el || prefersReducedMotion()) {
         navigate(to)
         scrollForRoute(to)
@@ -100,40 +91,44 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
       busy.current = true
       lockScroll()
       setTransitionPending(true)
-      const text = customLabel ?? labelFor(to)
-      if (label.current) {
-        label.current.innerHTML = text
-          .split('')
-          .map((ch) => `<span class="pt__char">${ch === ' ' ? '&nbsp;' : ch}</span>`)
-          .join('')
-      }
-      const chars = el.querySelectorAll('.pt__char')
-      const edge = el.querySelector('.pt__edge')
-      const cookie = el.querySelector('.pt__cookie')
+      const q = gsap.utils.selector(el)
+      const left = q('.pt__flap--l')
+      const right = q('.pt__flap--r')
+      const shades = q('.pt__shade')
+      const seals = q('.pt__seal')
 
       gsap
-        .timeline({ defaults: { ease: 'power3.inOut' } })
-        .set(el, { visibility: 'visible', yPercent: -100 })
-        .set(edge, { scaleY: 0.25 })
-        .to(el, { yPercent: 0, duration: 0.62 })
-        .to(edge, { scaleY: 1, duration: 0.7, ease: 'power2.out' }, 0.05)
-        .fromTo(chars, { yPercent: 110 }, { yPercent: 0, duration: 0.5, stagger: 0.025, ease: 'expo.out' }, 0.38)
-        .fromTo(cookie, { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 0.6, ease: 'back.out(2)' }, 0.32)
+        .timeline()
+        .set(el, { visibility: 'visible' })
+        .set(left, { rotationY: -96 })
+        .set(right, { rotationY: 96 })
+        .set(shades, { opacity: 0.4 })
+        .set(seals, { scale: 1.9, autoAlpha: 0, rotation: -40 })
+        // fold shut
+        .to(left, { rotationY: 0, duration: 0.62, ease: 'power3.in' }, 0)
+        .to(right, { rotationY: 0, duration: 0.62, ease: 'power3.in' }, 0.04)
+        .to(shades, { opacity: 0, duration: 0.62, ease: 'power2.in' }, 0)
+        // the thud
+        .to(el, { keyframes: { y: [0, 5, -2, 0] }, duration: 0.28, ease: 'power2.out' }, 0.66)
+        // seal it
+        .to(seals, { scale: 1, autoAlpha: 1, rotation: -8, duration: 0.42, ease: 'back.out(2.2)' }, 0.7)
         .call(() => {
           navigate(to)
           scrollForRoute(to)
         })
-        .to({}, { duration: 0.32 })
-        .to(chars, { yPercent: -110, duration: 0.35, stagger: 0.015, ease: 'power3.in' })
-        .to(cookie, { scale: 0, rotation: 120, duration: 0.35, ease: 'power3.in' }, '<')
+        .to({}, { duration: 0.18 })
         .call(() => {
           unlockScroll()
           setTransitionPending(false)
           window.dispatchEvent(new Event(PAGE_ENTER))
         })
-        .to(el, { yPercent: -118, duration: 0.8, ease: 'power3.inOut' }, '<0.1')
-        .to(edge, { scaleY: 1.9, duration: 0.8, ease: 'power2.in' }, '<')
+        // fold open; the seal splits along the seam
+        .addLabel('open')
+        .to(left, { rotationY: -100, duration: 0.85, ease: 'power3.inOut' }, 'open')
+        .to(right, { rotationY: 100, duration: 0.85, ease: 'power3.inOut' }, 'open+=0.05')
+        .to(shades, { opacity: 0.45, duration: 0.85, ease: 'power2.in' }, 'open')
         .set(el, { visibility: 'hidden' })
+        .set([left, right], { rotationY: 0 })
         .call(() => {
           busy.current = false
         })
@@ -146,30 +141,30 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={value}>
       {children}
-      <div className="pt" ref={sheet} aria-hidden="true">
-        <div className="pt__sheet">
-          <img className="pt__cookie" src="/cookies/oreo.webp" alt="" width={96} height={96} />
-          <span className="pt__label" ref={label} />
-        </div>
-        <svg className="pt__edge" viewBox="0 0 1440 160" preserveAspectRatio="none">
-          <path d={DRIP} />
-        </svg>
+      <div className="pt" ref={root} aria-hidden="true">
+        {(['l', 'r'] as const).map((side) => (
+          <div key={side} className={`pt__flap pt__flap--${side}`}>
+            <span className="pt__tab" />
+            <span className="pt__seal">
+              <Seal />
+            </span>
+            <span className="pt__shade" />
+          </div>
+        ))}
       </div>
     </Ctx.Provider>
   )
 }
 
-/** A link that pours the chocolate sheet before routing. */
+/** A link that closes the box before routing. */
 export function TLink({
   to,
-  label,
   className,
   children,
   onClick,
   ariaLabel,
 }: {
   to: string
-  label?: string
   className?: string
   children: ReactNode
   onClick?: () => void
@@ -180,7 +175,7 @@ export function TLink({
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
     e.preventDefault()
     onClick?.()
-    go(to, label)
+    go(to)
   }
   return (
     <a href={to} onClick={handle} className={className} aria-label={ariaLabel}>

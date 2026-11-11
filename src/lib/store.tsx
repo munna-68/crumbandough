@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { BOX_PRICES, DELIVERY_FEE, FLAVOURS, seedOrders } from './data'
+import { BOX_PRICES, DELIVERY_FEE, FLAVOURS, randomOrder, seedOrders } from './data'
 import { dayOptions, isoDate, makeRef } from './format'
 import { BOX_SIZES, type Box, type BoxSize, type Customer, type Fulfilment, type PlacedOrder, type Toast } from './types'
 
@@ -74,6 +74,7 @@ interface ShopValue {
   toast: (message: string, tone?: Toast['tone']) => void
   dismissToast: (id: number) => void
   advanceOrder: (id: string) => void
+  simulateOrder: () => PlacedOrder
   clearFresh: () => void
 }
 
@@ -379,9 +380,15 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const advanceOrder = useCallback((id: string) => {
     setOrders((prev) =>
       prev.map((o) =>
-        o.id === id ? { ...o, stage: o.stage === 'new' ? 'baking' : o.stage === 'baking' ? 'ready' : 'new' } : o,
+        o.id === id ? { ...o, stage: o.stage === 'new' ? 'baking' : o.stage === 'baking' ? 'ready' : 'done' } : o,
       ),
     )
+  }, [])
+
+  const simulateOrder = useCallback((): PlacedOrder => {
+    const order = randomOrder(makeRef(new Set(ordersRef.current.map((o) => o.ref))))
+    setOrders((prev) => [order, ...prev])
+    return order
   }, [])
 
   const value: ShopValue = {
@@ -425,6 +432,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     toast,
     dismissToast,
     advanceOrder,
+    simulateOrder,
     clearFresh: useCallback(() => setFreshOrderId(null), []),
   }
 

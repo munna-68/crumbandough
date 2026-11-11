@@ -33,7 +33,9 @@ function flyToSlot(from: HTMLElement, flavour: Flavour) {
     ghost.className = 'fly'
     Object.assign(ghost.style, { left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px`, height: `${a.height}px` })
     document.body.appendChild(ghost)
-    gsap.set(target, { opacity: 0 })
+    // The slot keeps looking empty (dashed ring and number) until the cookie lands in it.
+    const slot = target.closest('.slot')
+    slot?.classList.add('is-incoming')
 
     const dx = b.left + b.width / 2 - (a.left + a.width / 2)
     const dy = b.top + b.height / 2 - (a.top + a.height / 2)
@@ -42,7 +44,8 @@ function flyToSlot(from: HTMLElement, flavour: Flavour) {
       .timeline({
         onComplete: () => {
           ghost.remove()
-          gsap.fromTo(target, { opacity: 1, scale: 1.35 }, { scale: 1, duration: 0.5, ease: 'back.out(3)' })
+          slot?.classList.remove('is-incoming')
+          gsap.fromTo(target, { scale: 1.35 }, { scale: 1, duration: 0.5, ease: 'back.out(3)' })
         },
       })
       .to(ghost, { x: dx, duration: 0.62, ease: 'power2.inOut' }, 0)

@@ -16,8 +16,10 @@ const LINKS = [
 
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <span className={`wordmark ${className}`}>
-      crumb <span className="wordmark__and">and</span> dough
+    <span className={`wordmark ${className}`} aria-label="crumb and dough">
+      <span aria-hidden="true">
+        <span className="wordmark__c">c</span>rumb <span className="wordmark__and">and</span> dough
+      </span>
     </span>
   )
 }
