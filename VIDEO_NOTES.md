@@ -64,7 +64,7 @@ A cocoa section that **pins and scrolls sideways**. Four big cards slide past, a
 3. **Baked on the day you pick**: the day gets circled and the cookies puff up on the tray.
 4. **Packed by hand**: a pink box rises and the seal slaps on.
 
-Underneath, **a cookie rolls along a line from one side to the other**, leaving a pink trail, so you always know how far through you are. On a phone the cards simply stack and play as they scroll in.
+On a phone the cards simply stack and play as they scroll in.
 
 > Line: "From a tap on your phone to a box at your door, in four cards."
 
@@ -141,7 +141,7 @@ Your own order from the shop arrives with the "Just in" tag too.
 | 0:00–0:05 | Preloader | Open `/?intro=1`. Hands off. | "Most loaders are a spinner. This one eats the screen." |
 | 0:05–0:10 | Hero | Let the hero build. Wiggle the mouse a little. | "Chunky, gooey, homemade. Their words, not mine." |
 | 0:10–0:15 | SHOP trio | Scroll slowly. | "Three boxes: four, six and twelve. The four is their Monday deal." |
-| 0:15–0:22 | How it works | Steady scroll; the cookie rolls along. | "From a tap on your phone to a box at your door." |
+| 0:15–0:22 | How it works | Steady scroll; the cards act out each step. | "From a tap on your phone to a box at your door." |
 | 0:20–0:32 | Flavour roll | Steady scroll through all seven. | "Seven flavours, one scroll each." |
 | 0:32–0:36 | Instagram, contact, footer | One smooth scroll to the bottom. | "Their Instagram, rebuilt as a shopfront." |
 | 0:36–0:39 | Box transition | Click **Build your box** in the footer. | "Every page change closes a box." |

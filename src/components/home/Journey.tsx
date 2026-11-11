@@ -5,7 +5,7 @@ import { Seal, TLink } from '../Transition'
 
 /*
  * "From a tap to your door". On desktop the section pins and four big cards
- * slide past sideways while a cookie rolls along a track underneath; each card
+ * slide past sideways; each card
  * acts out its step as it arrives (slots fill, a ticket gets stamped, a day is
  * circled and the cookies puff, the box gets its seal). On phones the cards
  * stack and each one plays as it scrolls into view.
@@ -44,8 +44,6 @@ export function Journey() {
       const mm = gsap.matchMedia()
       mm.add(`${MOTION} and (min-width: 900px)`, () => {
         const track = q('.journey__track')[0] as HTMLElement
-        const roller = q('.journey__roller')[0] as HTMLElement
-        const fill = q('.journey__fill')[0] as HTMLElement
         const dist = () => track.scrollWidth - window.innerWidth
         const slide = gsap.to(track, {
           x: () => -dist(),
@@ -57,13 +55,6 @@ export function Journey() {
             pin: true,
             scrub: 0.6,
             invalidateOnRefresh: true,
-            onUpdate: (self) => {
-              const w = (roller.parentElement as HTMLElement).offsetWidth
-              const x = self.progress * (w - roller.offsetWidth)
-              gsap.set(roller, { x, rotation: (x / (Math.PI * roller.offsetWidth)) * 360 })
-              // The pink line trails right behind the cookie, all the way to the end.
-              gsap.set(fill, { scaleX: (x + roller.offsetWidth / 2) / w })
-            },
           },
         })
         acts((panel) => ({ trigger: panel, containerAnimation: slide, start: 'left 95%', end: 'left 62%', scrub: true }))
@@ -182,13 +173,6 @@ export function Journey() {
           </article>
         </div>
 
-        <div className="journey__rail" aria-hidden="true">
-          <span className="journey__line" />
-          <span className="journey__fill" />
-          <span className="journey__roller">
-            <Cookie id="classic-chocolate" alt="" />
-          </span>
-        </div>
       </div>
     </section>
   )

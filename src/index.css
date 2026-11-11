@@ -1075,57 +1075,27 @@ html.no-intro #boot {
   color: #9c6a55;
   font-size: clamp(130px, 14vw, 228px);
 }
-.trio__cookie {
+.trio__shot {
   position: absolute;
-  left: 8%;
-  bottom: 6%;
-  width: 66%;
-  aspect-ratio: 1;
-  filter: drop-shadow(10px 18px 16px rgba(74, 43, 30, 0.22));
-  transition: transform 0.7s var(--ease-out);
+  left: 0;
+  bottom: 2%;
+  width: 84%;
+  height: 88%;
+  display: flex;
+  align-items: flex-end;
+  transform-origin: 40% 100%;
 }
-.trio__link:hover .trio__cookie img {
-  transform: rotate(24deg) scale(1.04);
-}
-.trio__cookie img {
+.trio__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left bottom;
+  filter: drop-shadow(8px 14px 14px rgba(74, 43, 30, 0.12));
   transition: transform 0.9s var(--ease-out);
+  transform-origin: 40% 100%;
 }
-.trio__shadow {
-  position: absolute;
-  left: 14%;
-  bottom: 3%;
-  width: 54%;
-  height: 7%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(74, 43, 30, 0.18), transparent);
-}
-.trio__prop {
-  position: absolute;
-}
-.trio__prop--sphere {
-  right: 14%;
-  bottom: 6%;
-  width: 18%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 30%, #fbe1ee 0%, #eeafcd 52%, #d98fb4 100%);
-  box-shadow: 8px 6px 14px rgba(74, 43, 30, 0.16);
-}
-.trio__prop--block {
-  right: 8%;
-  bottom: 6%;
-  width: 24%;
-  height: 26%;
-  background: #f2dcb0;
-  box-shadow: inset -10px 0 16px rgba(74, 43, 30, 0.07), 10px 6px 16px rgba(74, 43, 30, 0.14);
-}
-.trio__prop--stack {
-  right: 6%;
-  bottom: 6%;
-  width: 26%;
-  height: 40%;
-  background: linear-gradient(180deg, #6e4434 0 8%, #5a3426 8% 100%);
-  box-shadow: 10px 6px 16px rgba(74, 43, 30, 0.16);
+.trio__link:hover .trio__shot img {
+  transform: rotate(-3deg) scale(1.04);
 }
 .trio__text {
   margin-top: 18px;
@@ -1444,38 +1414,6 @@ html.no-intro #boot {
   fill: var(--pink);
 }
 
-/* the rail with the rolling cookie */
-.journey__rail {
-  position: relative;
-  height: 64px;
-  margin: clamp(18px, 3vh, 36px) var(--gutter) 0;
-}
-.journey__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-top: 2px dashed rgba(243, 198, 221, 0.35);
-}
-.journey__fill {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 4px;
-  border-radius: 4px;
-  background: var(--pink);
-  transform: scaleX(0);
-  transform-origin: left center;
-}
-.journey__roller {
-  position: absolute;
-  left: 0;
-  bottom: 1px;
-  width: 64px;
-  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.35));
-}
-
 /* phones (and reduced motion): stacked cards, no pin */
 @media (max-width: 899px) {
   .journey__pin {
@@ -1499,9 +1437,6 @@ html.no-intro #boot {
   .jcard__art {
     padding: 22px 0 26px;
   }
-  .journey__rail {
-    display: none;
-  }
 }
 .journey--static .journey__pin {
   height: auto;
@@ -1510,9 +1445,6 @@ html.no-intro #boot {
 .journey--static .journey__track {
   flex-wrap: wrap;
   width: auto;
-}
-.journey--static .journey__rail {
-  display: none;
 }
 
 /* ---------- flavour stage (pinned) ------------------------------------ */
