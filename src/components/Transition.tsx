@@ -89,7 +89,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         return
       }
       busy.current = true
-      lockScroll()
+      lockScroll({ keepBar: true })
       setTransitionPending(true)
       const q = gsap.utils.selector(el)
       const left = q('.pt__flap--l')
@@ -118,7 +118,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
         })
         .to({}, { duration: 0.18 })
         .call(() => {
-          unlockScroll()
+          unlockScroll({ keepBar: true })
           setTransitionPending(false)
           window.dispatchEvent(new Event(PAGE_ENTER))
         })

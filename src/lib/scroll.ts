@@ -72,20 +72,29 @@ export function scrollToHash(hash: string) {
 }
 
 let locks = 0
+let hardLocks = 0
 
-/** Freeze page scroll under a dialog or transition. Nested calls are counted. */
-export function lockScroll() {
+/**
+ * Freeze page scroll under a dialog or transition. Nested calls are counted.
+ * `keepBar` (used by the page transition) only stops Lenis, which already
+ * swallows wheel and touch, so the scrollbar stays put and the page width
+ * doesn't jump. Dialogs, or any page without Lenis, also hide overflow.
+ */
+export function lockScroll({ keepBar = false }: { keepBar?: boolean } = {}) {
   locks += 1
-  if (locks > 1) return
   lenis?.stop()
+  if (keepBar && lenis) return
+  hardLocks += 1
   document.documentElement.classList.add('is-locked')
 }
 
-export function unlockScroll() {
+export function unlockScroll({ keepBar = false }: { keepBar?: boolean } = {}) {
   locks = Math.max(0, locks - 1)
-  if (locks > 0) return
-  lenis?.start()
-  document.documentElement.classList.remove('is-locked')
+  if (!(keepBar && lenis)) {
+    hardLocks = Math.max(0, hardLocks - 1)
+    if (hardLocks === 0) document.documentElement.classList.remove('is-locked')
+  }
+  if (locks === 0) lenis?.start()
 }
 
 export function refreshScroll() {
