@@ -1,23 +1,82 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { FLAVOURS } from '../lib/data'
-import { dayLabel, longDate, money, orderCookies, relativeTime } from '../lib/format'
-import { MOTION, SplitText, gsap, onPageReady, useGSAP } from '../lib/motion'
-import { useShop } from '../lib/store'
-import type { OrderStage, PlacedOrder } from '../lib/types'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Wordmark } from '../components/Chrome'
 import { Cookie } from '../components/Cookie'
 import { TLink } from '../components/Transition'
+import { FLAVOURS, TIME_SLOTS } from '../lib/data'
+import { dayLabel, longDate, money, orderCookies, relativeTime } from '../lib/format'
+import { Flip, MOTION, gsap, onPageReady, useGSAP } from '../lib/motion'
+import { useShop } from '../lib/store'
+import type { OrderStage, PlacedOrder } from '../lib/types'
 
-const STAGES: Array<{ id: OrderStage; label: string; next: string }> = [
-  { id: 'new', label: 'New', next: 'Start baking' },
-  { id: 'baking', label: 'Baking', next: 'Mark ready' },
-  { id: 'ready', label: 'Ready', next: 'Back to new' },
+/*
+ * The kitchen, as its own little app: no site nav, a sidebar, a live clock,
+ * counters that tick, and a three-column board where cards Flip between
+ * columns as they move along. "Simulate an order" drops a believable order in
+ * so the board can be shown off without placing one by hand.
+ */
+
+type View = 'board' | 'bake' | 'run'
+type Col = Exclude<OrderStage, 'done'>
+
+const COLUMNS: Array<{ id: Col; label: string; next: string; hint: string }> = [
+  { id: 'new', label: 'New', next: 'Start baking', hint: 'Just landed' },
+  { id: 'baking', label: 'Baking', next: 'Mark ready', hint: 'In the oven' },
+  { id: 'ready', label: 'Ready', next: 'Hand over', hint: 'Boxed and sealed' },
 ]
 
-/** The back of house: every box ordered on the site, and how many of each flavour to bake. */
+const VIEWS: Array<{ id: View; label: string; icon: string }> = [
+  { id: 'board', label: 'Board', icon: 'M3 4h5v16H3zM10 4h5v10h-5zM17 4h4v13h-4z' },
+  { id: 'bake', label: 'Bake list', icon: 'M4 6h16M4 12h10M4 18h6' },
+  { id: 'run', label: 'Run sheet', icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 4v5l3 2' },
+]
+
+function greeting(d: Date) {
+  const h = d.getHours()
+  return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
+}
+
+function useClock() {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(new Date()), 1000)
+    return () => window.clearInterval(t)
+  }, [])
+  return now
+}
+
+/** A number that rolls to its new value instead of jumping. */
+function Count({ value, format = String }: { value: number; format?: (n: number) => string }) {
+  const el = useRef<HTMLSpanElement>(null)
+  const shown = useRef(0)
+  useEffect(() => {
+    const node = el.current
+    if (!node) return
+    const o = { v: shown.current }
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const tw = gsap.to(o, {
+      v: value,
+      duration: still ? 0 : 1.1,
+      ease: 'power3.out',
+      onUpdate: () => {
+        shown.current = o.v
+        node.textContent = format(Math.round(o.v))
+      },
+    })
+    return () => {
+      tw.kill()
+    }
+  }, [value, format])
+  return <span ref={el}>{format(0)}</span>
+}
+
 export function Kitchen() {
-  const { orders, freshOrderId, clearFresh, advanceOrder } = useShop()
-  const [fresh] = useState(freshOrderId)
-  const root = useRef<HTMLElement>(null)
+  const { orders, freshOrderId, clearFresh, advanceOrder, simulateOrder, toast } = useShop()
+  const root = useRef<HTMLDivElement>(null)
+  const flip = useRef<Flip.FlipState | null>(null)
+  const [view, setView] = useState<View>('board')
+  const [justIn, setJustIn] = useState<string | null>(freshOrderId)
+  const [leaving, setLeaving] = useState<string | null>(null)
+  const now = useClock()
 
   useEffect(() => {
     if (freshOrderId) clearFresh()
@@ -27,164 +86,328 @@ export function Kitchen() {
     () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [orders],
   )
-  const open = sorted.filter((o) => o.stage !== 'ready')
+  const live = sorted.filter((o) => o.stage !== 'done')
+  const handed = orders.filter((o) => o.stage === 'done').length
   const bake = useMemo(() => {
     const t = new Map<string, number>()
-    for (const o of open) for (const b of o.boxes) for (const i of b.items) t.set(i.flavourId, (t.get(i.flavourId) ?? 0) + i.qty)
-    return FLAVOURS.map((f) => ({ f, qty: t.get(f.id) ?? 0 }))
-      .filter((r) => r.qty > 0)
-      .sort((a, b) => b.qty - a.qty)
-  }, [open])
+    for (const o of live)
+      if (o.stage !== 'ready')
+        for (const b of o.boxes) for (const i of b.items) t.set(i.flavourId, (t.get(i.flavourId) ?? 0) + i.qty)
+    return FLAVOURS.map((f) => ({ f, qty: t.get(f.id) ?? 0 })).sort((a, b) => b.qty - a.qty)
+  }, [live])
   const toBake = bake.reduce((a, r) => a + r.qty, 0)
   const max = Math.max(1, ...bake.map((r) => r.qty))
   const takings = orders.reduce((a, o) => a + o.total, 0)
+
+  /* ---------- Flip: record before a change, play after React commits ---------- */
+
+  const capture = useCallback(() => {
+    if (!root.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    flip.current = Flip.getState(root.current.querySelectorAll('.kcard'))
+  }, [])
+
+  useLayoutEffect(() => {
+    const state = flip.current
+    if (!state || !root.current) return
+    flip.current = null
+    Flip.from(state, {
+      targets: root.current.querySelectorAll('.kcard'),
+      duration: 0.7,
+      ease: 'power3.inOut',
+      absolute: true,
+      nested: true,
+      onEnter: (els) =>
+        gsap.fromTo(
+          els,
+          { autoAlpha: 0, scale: 0.6, y: -40, rotation: -4 },
+          { autoAlpha: 1, scale: 1, y: 0, rotation: 0, duration: 0.9, ease: 'elastic.out(1, 0.6)' },
+        ),
+    })
+  }, [orders])
+
+  const move = (o: PlacedOrder) => {
+    if (o.stage === 'ready') {
+      const card = root.current?.querySelector(`[data-flip-id="${o.id}"]`)
+      const done = () => {
+        capture()
+        setLeaving(null)
+        advanceOrder(o.id)
+        toast(`${o.ref} handed over to ${o.name}`)
+      }
+      if (!card || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return done()
+      setLeaving(o.id)
+      gsap.to(card, { x: 80, rotation: 8, autoAlpha: 0, duration: 0.45, ease: 'power2.in', onComplete: done })
+      return
+    }
+    capture()
+    advanceOrder(o.id)
+  }
+
+  const simulate = () => {
+    if (view !== 'board') setView('board')
+    capture()
+    const o = simulateOrder()
+    setJustIn(o.id)
+    toast(`New order: ${o.ref} from ${o.name}, ${orderCookies(o)} cookies`)
+  }
+
+  /* ---------- entrance ---------- */
 
   useGSAP(
     (_ctx, contextSafe) => {
       const mm = gsap.matchMedia()
       mm.add(MOTION, () => {
         const q = gsap.utils.selector(root)
-        const split = SplitText.create(q('.khead__title .line'), { type: 'chars', mask: 'chars' })
-        gsap.set(split.chars, { yPercent: 110 })
-        gsap.set(q('.kfade'), { autoAlpha: 0, y: 24 })
-        gsap.set(q('.kbar__fill'), { scaleX: 0 })
-        const off = onPageReady(contextSafe!(() => {
-          gsap
-            .timeline({ defaults: { ease: 'expo.out' } })
-            .to(split.chars, { yPercent: 0, duration: 1, stagger: 0.03 })
-            .to(q('.kfade'), { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.05 }, 0.2)
-            .to(q('.kbar__fill'), { scaleX: 1, duration: 1.2, stagger: 0.06 }, 0.5)
-            .from(q('.order.is-fresh'), { scale: 0.9, duration: 1, ease: 'elastic.out(1, 0.6)' }, 0.5)
-        }))
-        return () => {
-          off()
-          split.revert()
-        }
+        gsap.set(q('.kside'), { xPercent: -100 })
+        gsap.set(q('.kin'), { autoAlpha: 0, y: 26 })
+        const off = onPageReady(
+          contextSafe!(() => {
+            gsap
+              .timeline({ defaults: { ease: 'expo.out' } })
+              .to(q('.kside'), { xPercent: 0, duration: 1 })
+              .to(q('.kin'), { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.06 }, 0.15)
+              .from(q('.kcard'), { y: 40, autoAlpha: 0, rotation: () => gsap.utils.random(-4, 4), duration: 0.9, stagger: 0.06 }, 0.35)
+          }),
+        )
+        return off
       })
     },
     { scope: root },
   )
 
+  // Switching views: the new panel slides up.
+  useEffect(() => {
+    const el = root.current?.querySelector('.kview')
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    gsap.fromTo(el, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'expo.out' })
+  }, [view])
+
+  const time = now.toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit', hour12: true })
+
   return (
-    <main id="main" className="kitchen" ref={root}>
-      <header className="khead">
-        <div>
-          <p className="khead__date kfade">{longDate()}</p>
-          <h1 className="khead__title">
-            <span className="line">Kitchen</span> <span className="line">board</span>
-          </h1>
-          <p className="khead__lede kfade">
-            Every box ordered on the site lands here. Tap an order to move it along. Demo data, kept in this browser
-            tab only.
-          </p>
-        </div>
-        <TLink to="/shop" className="btn btn--cocoa kfade">
-          Place a test order
+    <div className="kapp" ref={root}>
+      <aside className="kside" aria-label="Kitchen">
+        <TLink to="/" className="kside__brand" aria-label="crumb and dough, back to the site">
+          <Wordmark />
         </TLink>
-      </header>
-
-      {fresh ? <FreshBanner order={orders.find((o) => o.id === fresh)} /> : null}
-
-      <dl className="kstats">
-        <div className="kstat kfade">
-          <dt>Open orders</dt>
-          <dd>{open.length}</dd>
+        <p className="kside__tag">Kitchen</p>
+        <nav className="kside__nav">
+          {VIEWS.map((v) => (
+            <button
+              key={v.id}
+              type="button"
+              className={`kside__link ${view === v.id ? 'is-on' : ''}`}
+              aria-current={view === v.id ? 'page' : undefined}
+              onClick={() => setView(v.id)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d={v.icon} />
+              </svg>
+              {v.label}
+              {v.id === 'board' ? <span className="kside__badge">{live.length}</span> : null}
+            </button>
+          ))}
+        </nav>
+        <div className="kside__live">
+          <span className="kside__dot" aria-hidden="true" />
+          Taking orders
         </div>
-        <div className="kstat kfade">
-          <dt>Cookies to bake</dt>
-          <dd>{toBake}</dd>
+        <button type="button" className="kside__sim" onClick={simulate}>
+          <span aria-hidden="true">+</span> Simulate an order
+        </button>
+        <div className="kside__links">
+          <TLink to="/shop">Place a real test order</TLink>
+          <TLink to="/">Back to the site</TLink>
         </div>
-        <div className="kstat kfade">
-          <dt>Deliveries</dt>
-          <dd>{open.filter((o) => o.mode === 'delivery').length}</dd>
-        </div>
-        <div className="kstat kfade">
-          <dt>On the board</dt>
-          <dd>{money(takings)}</dd>
-        </div>
-      </dl>
+      </aside>
 
-      <div className="kgrid">
-        <section aria-labelledby="queue-title">
-          <h2 id="queue-title" className="ksub kfade">
-            The queue
-          </h2>
-          <ul className="queue">
-            {sorted.map((o) => (
-              <OrderCard key={o.id} order={o} fresh={o.id === fresh} onAdvance={() => advanceOrder(o.id)} />
-            ))}
-          </ul>
-        </section>
-        <section aria-labelledby="bake-title" className="kbake">
-          <h2 id="bake-title" className="ksub kfade">
-            Bake list
-          </h2>
-          <ul className="kbars">
-            {bake.map(({ f, qty }) => (
-              <li key={f.id} className="kbar kfade">
-                <span className="kbar__thumb">
-                  <Cookie id={f.id} alt="" />
-                </span>
-                <span className="kbar__name">{f.name}</span>
-                <span className="kbar__track">
-                  <span className="kbar__fill" style={{ width: `${(qty / max) * 100}%`, background: f.accent }} />
-                </span>
-                <span className="kbar__qty">{qty}</span>
-              </li>
-            ))}
-            {bake.length === 0 ? <li className="kbar__empty">Nothing to bake. Enjoy the quiet.</li> : null}
-          </ul>
-        </section>
-      </div>
-    </main>
-  )
-}
+      <main id="main" className="kmain">
+        <header className="ktop kin">
+          <div>
+            <p className="ktop__date">{longDate(now)}</p>
+            <h1 className="ktop__title">{greeting(now)}, kitchen.</h1>
+          </div>
+          <div className="ktop__right">
+            <span className="ktop__clock" aria-label={`The time is ${time}`}>
+              {time}
+            </span>
+            <button type="button" className="ktop__sim" onClick={simulate}>
+              + Simulate
+            </button>
+          </div>
+        </header>
 
-function FreshBanner({ order }: { order?: PlacedOrder }) {
-  if (!order) return null
-  return (
-    <div className="fresh kfade" role="status">
-      <span className="fresh__tag">Just in</span>
-      <p>
-        {order.ref} from {order.name}: {orderCookies(order)} cookies for {order.mode === 'pickup' ? 'pick up' : `delivery to ${order.area}`}{' '}
-        {dayLabel(order.date)}, {order.slot}.
-      </p>
+        <nav className="ktabs kin" aria-label="Kitchen views">
+          {VIEWS.map((v) => (
+            <button key={v.id} type="button" className={view === v.id ? 'is-on' : ''} onClick={() => setView(v.id)}>
+              {v.label}
+            </button>
+          ))}
+        </nav>
+
+        <dl className="kstats">
+          <div className="kstat kin">
+            <dt>Open orders</dt>
+            <dd>
+              <Count value={live.length} />
+            </dd>
+          </div>
+          <div className="kstat kin">
+            <dt>Cookies to bake</dt>
+            <dd>
+              <Count value={toBake} />
+            </dd>
+          </div>
+          <div className="kstat kin">
+            <dt>Handed over</dt>
+            <dd>
+              <Count value={handed} />
+            </dd>
+          </div>
+          <div className="kstat kstat--cocoa kin">
+            <dt>Taken today</dt>
+            <dd>
+              <Count value={takings} format={money} />
+            </dd>
+          </div>
+        </dl>
+
+        {view === 'board' ? (
+          <div className="kview kboard kin">
+            {COLUMNS.map((c) => {
+              const list = live.filter((o) => o.stage === c.id)
+              return (
+                <section key={c.id} className={`kcol kcol--${c.id}`} aria-labelledby={`kcol-${c.id}`}>
+                  <header className="kcol__head">
+                    <h2 id={`kcol-${c.id}`}>{c.label}</h2>
+                    <span className="kcol__count">
+                      {list.length}
+                    </span>
+                    <p>{c.hint}</p>
+                  </header>
+                  <ul className="kcol__list">
+                    {list.map((o) => (
+                      <OrderCard
+                        key={o.id}
+                        order={o}
+                        next={c.next}
+                        fresh={o.id === justIn}
+                        busy={leaving === o.id}
+                        onMove={() => move(o)}
+                      />
+                    ))}
+                    {list.length === 0 ? <li className="kcol__empty">Nothing here.</li> : null}
+                  </ul>
+                </section>
+              )
+            })}
+          </div>
+        ) : null}
+
+        {view === 'bake' ? (
+          <section className="kview kpanel" aria-labelledby="bake-title">
+            <h2 id="bake-title" className="kpanel__title">
+              Bake list <span>{toBake} cookies for new and baking orders</span>
+            </h2>
+            <ul className="kbars">
+              {bake.map(({ f, qty }) => (
+                <li key={f.id} className={`kbar ${qty === 0 ? 'is-zero' : ''}`}>
+                  <span className="kbar__thumb">
+                    <Cookie id={f.id} alt="" />
+                  </span>
+                  <span className="kbar__name">
+                    {f.name}
+                    <small>{f.note}</small>
+                  </span>
+                  <span className="kbar__track">
+                    <span className="kbar__fill" style={{ width: `${(qty / max) * 100}%`, background: f.accent }} />
+                  </span>
+                  <span className="kbar__qty">{qty}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
+        {view === 'run' ? (
+          <section className="kview kpanel" aria-labelledby="run-title">
+            <h2 id="run-title" className="kpanel__title">
+              Run sheet <span>Today, by pick up and drop off window</span>
+            </h2>
+            <ol className="krun">
+              {TIME_SLOTS.map((slot) => {
+                const list = live.filter((o) => o.slot === slot)
+                return (
+                  <li key={slot} className="krun__slot">
+                    <span className="krun__time">{slot}</span>
+                    <ul>
+                      {list.map((o) => (
+                        <li key={o.id} className={`krun__item stage-${o.stage}`}>
+                          <strong>{o.name}</strong>
+                          <span>
+                            {o.ref}, {orderCookies(o)} cookies
+                          </span>
+                          <span className="krun__mode">{o.mode === 'pickup' ? 'Pick up' : `Drop off, ${o.area}`}</span>
+                          <span className="krun__stage">{o.stage}</span>
+                        </li>
+                      ))}
+                      {list.length === 0 ? <li className="krun__free">Free</li> : null}
+                    </ul>
+                  </li>
+                )
+              })}
+            </ol>
+          </section>
+        ) : null}
+      </main>
     </div>
   )
 }
 
-function OrderCard({ order, fresh, onAdvance }: { order: PlacedOrder; fresh: boolean; onAdvance: () => void }) {
-  const stage = STAGES.find((s) => s.id === order.stage) ?? STAGES[0]
+function OrderCard({
+  order,
+  next,
+  fresh,
+  busy,
+  onMove,
+}: {
+  order: PlacedOrder
+  next: string
+  fresh: boolean
+  busy: boolean
+  onMove: () => void
+}) {
+  const cookies = order.boxes.flatMap((b, bi) =>
+    b.items.flatMap((i) => Array.from({ length: i.qty }, (_, k) => ({ key: `${bi}-${i.flavourId}-${k}`, ...i }))),
+  )
   return (
-    <li className={`order kfade stage-${order.stage} ${fresh ? 'is-fresh' : ''}`}>
-      <div className="order__top">
-        <p className="order__who">
+    <li className={`kcard stage-${order.stage} ${fresh ? 'is-fresh' : ''}`} data-flip-id={order.id}>
+      <div className="kcard__top">
+        <p className="kcard__who">
           <strong>{order.name}</strong>
           <span>{order.ref}</span>
         </p>
-        <span className="order__stage">{stage.label}</span>
+        {fresh ? <span className="kcard__tag">Just in</span> : <span className="kcard__ago">{relativeTime(order.createdAt)}</span>}
       </div>
-      <div className="order__cookies" aria-label={`${orderCookies(order)} cookies`}>
-        {order.boxes.flatMap((b, bi) =>
-          b.items.flatMap((i) =>
-            Array.from({ length: i.qty }).map((_, k) => (
-              <span key={`${bi}-${i.flavourId}-${k}`} className="order__c" title={i.name}>
-                <Cookie id={i.flavourId} alt="" />
-              </span>
-            )),
-          ),
-        )}
+      <div className="kcard__cookies" aria-label={`${cookies.length} cookies`}>
+        {cookies.map((c) => (
+          <span key={c.key} className="kcard__c" title={c.name}>
+            <Cookie id={c.flavourId} alt="" />
+          </span>
+        ))}
       </div>
-      <p className="order__meta">
-        {order.mode === 'pickup' ? 'Pick up' : `Delivery, ${order.area}`} {dayLabel(order.date)}, {order.slot}
+      <p className="kcard__meta">
+        <span className={`kcard__mode kcard__mode--${order.mode}`}>{order.mode === 'pickup' ? 'Pick up' : order.area}</span>
+        {dayLabel(order.date)}, {order.slot}
       </p>
-      {order.note ? <p className="order__note">“{order.note}”</p> : null}
-      <div className="order__foot">
-        <span>
-          {money(order.total)}, {relativeTime(order.createdAt)}
-        </span>
-        <button type="button" className="btn btn--outline btn--sm" onClick={onAdvance}>
-          {stage.next}
+      {order.note ? <p className="kcard__note">“{order.note}”</p> : null}
+      <div className="kcard__foot">
+        <span>{money(order.total)}</span>
+        <button type="button" className="kcard__btn" onClick={onMove} disabled={busy}>
+          {next}
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" />
+          </svg>
         </button>
       </div>
     </li>

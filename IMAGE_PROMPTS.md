@@ -1,104 +1,50 @@
-# Image and video prompts
+# Images to generate
 
-The site works today with no generated images: the hero and footer still lifes are built in code from cookie cutouts. These prompts give you real photography to swap in. Generate them, drop the files where each section says, switch on the slot in `src/lib/photos.ts`, and they replace the drawn still life automatically.
+The hero, journey and footer images are done (`hero-box.webp`, `hero-stack.webp`, `footer-pile.webp`, cut from your three photos). The story video is no longer needed; that section became "How it works".
 
-**Only the two hero images matter for launch.** Everything else is optional.
+**Needed now:** three images for the shop section (the big 4 / 6 / 12). They replace the flat cookie with a pink ball and plain squares next to it. Like the reference, each one is a single product standing with real props, not shapes.
 
----
+## Specs at a glance
 
-## The look (paste this into every prompt if your generator supports a style or "reference" field)
+| # | File name | Folder | Aspect ratio | Resolution | Background | Needed? |
+|---|---|---|---|---|---|---|
+| 1 | `trio-4.png` | `public/images/` | 1:1 | 1600 × 1600 | Transparent (or pure white) | Yes |
+| 2 | `trio-6.png` | `public/images/` | 1:1 | 1600 × 1600 | Transparent (or pure white) | Yes |
+| 3 | `trio-12.png` | `public/images/` | 1:1 | 1600 × 1600 | Transparent (or pure white) | Yes |
+| 4 | `<flavour-id>-lg.png` (×7) | `public/cookies/` | 1:1 | 1200 × 1200 | Transparent (or pure white) | Optional |
 
-> Minimal studio still life, set design photography. Flat seamless baby pink backdrop (#F3C6DD) and floor in the same pink. Geometric plinths: rectangular blocks and cylinders in matte rose pink (#E6A3C4), warm milk white (#FFFAF7), chocolate brown (#4A2B1E) and soft butter yellow (#F6E4BF). Small matte spheres in pink and chocolate brown. One large soft arch shape behind. Soft diffused light from the upper left, gentle long shadows, no harsh highlights. Chunky homemade stuffed cookies, about 10 cm wide and 3 cm tall, craggy tops, visible chocolate chunks, slightly gooey centres. Clean, playful, high-end, shot on a medium-format camera, 50 mm, f/8, everything sharp. No text, no logos, no packaging, no people, no hands.
+- Images only, no video. Use the nearest size with the same 1:1 ratio if your tool can't hit it exactly.
+- Generate all three in one session if you can, so the camera angle and light match. The big numbers go behind them on the site, so keep the top right of each frame fairly clear.
+- If transparency isn't supported, use pure white and I'll cut them out.
 
-Avoid: text, letters, logos, brand names, people, hands, packaging, plates, cutlery, crumbs scattered everywhere, glossy plastic, neon colours, grey or white backdrop, wood, marble, blur, vignette.
+**Shared style line (add to the end of all three):**
 
----
+> Product photo, eye level, camera slightly above, soft studio light from the upper left, soft contact shadow under the objects. Matte, natural, appetising. No text, no logo, no people, no plate, no table. Isolated on a transparent background (or plain pure white). Square 1600 × 1600; the group fills about 70% of the frame, sits slightly left of centre, nothing cropped.
 
-## 1. Hero, desktop (required)
+## 1. `trio-4.png`: the little box (pink)
 
-**File:** `public/images/hero-desktop.webp`
-**Size:** 16:9, 2400 × 1350 (or larger, export as WebP around 80% quality, under 400 KB)
+> One chunky red velvet cookie with a white cream cheese swirl and white chocolate chips, standing upright on its edge and leaning back about 20°, so you see the craggy top. It leans against a short tower of three stacked matte baby pink macaron-style meringue kisses (#F3C6DD). Two white chocolate chunks rest at its base.
 
-> Wide minimal studio still life on a seamless baby pink (#F3C6DD) backdrop and floor. **The left 45% of the frame is empty pink space** for a headline. On the right half: a large soft pink arch in the background; in front of it a group of geometric plinths of different heights, a tall rose pink block, a wide milk-white block, a short chocolate brown cylinder and a butter yellow cube. Six chunky stuffed cookies stand upright and lie on the plinths at playful angles: a chocolate chunk cookie, a red velvet cookie with a white cream cheese swirl, an Oreo cookies and cream cookie, a Biscoff cookie with a caramel centre, a peanut butter cup cookie, and a white chocolate KitKat cookie. Two small matte spheres, one pink and one chocolate, sit on the floor. Soft light from the upper left, long gentle shadows falling to the right. Clean set design photography, medium format, everything in focus, warm and playful. No text, no logos, no people.
+## 2. `trio-6.png`: the everyday box (caramel)
 
-**Check before using:** nothing important in the left 45%, the horizon (where the floor meets the wall) sits about 75–80% down the frame, cookies are the hero not the blocks.
+> One chunky Biscoff cookie with a melted caramel centre and biscuit pieces, standing upright on its edge and leaning back about 20°. Beside it, a neat stack of five Lotus-style caramelised biscuits (no branding visible), and a small glossy cube of soft caramel in front. Warm caramel and cream tones.
 
----
+## 3. `trio-12.png`: the party box (cocoa)
 
-## 2. Hero, mobile (required)
+> One chunky double chocolate cookie with white and dark chocolate chunks, standing upright on its edge and leaning back about 20°. Behind it, a tall broken slab of dark chocolate (two thick squares stacked, with snapped edges), and two whole cookies lying flat and stacked at its base. Deep cocoa browns.
 
-**File:** `public/images/hero-mobile.webp`
-**Size:** 9:16, 1080 × 1920 (WebP, under 300 KB)
+## 4. Real flavour cookies (optional)
 
-> Tall vertical minimal studio still life on a seamless baby pink (#F3C6DD) backdrop and floor. **The top 45% of the frame is empty pink space** for a headline. In the lower 55%: a soft pink arch behind a stacked group of geometric plinths, a tall rose pink block in the centre, a milk-white block to the left and a short chocolate brown cylinder to the right. Four chunky stuffed cookies stand upright on the plinths: a red velvet cookie with a white cream cheese swirl on top of the tallest block, an Oreo cookies and cream cookie, a chocolate chunk cookie and a Biscoff cookie with a caramel centre. One small chocolate sphere and one pink sphere on the floor. Soft light from the upper left, gentle shadows. Clean set design photography, everything in focus. No text, no logos, no people.
+Replaces the borrowed Bake House photos. One file per flavour: `public/cookies/<id>-lg.png`. I make the small versions.
 
-**Check before using:** the subject sits in the bottom half, nothing is cut off at the sides (phones crop the edges a little).
+> Top-down product photo of one chunky homemade stuffed cookie, about 10 cm wide, perfectly centred, seen from directly above. [FLAVOUR]. Craggy cracked top, slightly uneven round edge, soft even studio light. No plate, no crumbs, no text. Transparent background (or pure white). Square, 1200 × 1200, about 6% empty space around the cookie.
 
----
-
-## 3. Hero video loop (optional, instead of the still images)
-
-Only worth it if the result is very clean. A short seamless loop, no camera cuts.
-
-**Files:** `public/images/hero-desktop.mp4` (16:9, 1920 × 1080) and `public/images/hero-mobile.mp4` (9:16, 1080 × 1920), 6–8 seconds, H.264, no audio, under 4 MB each.
-
-> Same set and composition as the hero still above (baby pink studio, empty left side, plinths and cookies on the right). Locked-off camera, no camera movement. Very slow, subtle motion only: one cookie on the top plinth slowly turns a quarter turn on its edge, a small pink sphere rolls a few centimetres and stops, a faint crumb falls. Soft light, no flicker. The last frame matches the first frame so it loops seamlessly. No text, no people.
-
-The site doesn't play video yet. If you make one, tell me and I'll add a `<video>` slot with the still image as its poster.
-
----
-
-## 4. Footer still life (optional)
-
-**File:** `public/images/footer.webp`
-**Size:** 3:2, 1800 × 1200, **transparent background** (PNG converted to WebP) or a pink (#FBE9F1) background
-
-> Small minimal still life on a very light pink (#FBE9F1) ground: a wide milk-white block and a taller rose pink block side by side, a white chocolate KitKat cookie leaning on the white block, an Oreo cookie standing on top of the pink block, a red velvet cookie lying on the floor in front, one chocolate sphere and one small pink sphere. Soft light from the upper left. Subject anchored to the bottom right of the frame, empty space top left. No text, no people.
-
----
-
-## 5. Real flavour cutouts (later, when you have the real cookies)
-
-The cookies on the site are borrowed Bake House photos. When the real cookies can be shot (or generated to match them), replace them one for one. Each flavour needs two files with the same name:
-
-| Flavour | Files in `public/cookies/` |
-| --- | --- |
-| Classic chocolate | `classic-chocolate.webp`, `classic-chocolate-lg.webp` |
-| Red velvet | `red-velvet.webp`, `red-velvet-lg.webp` |
-| Lemon cheesecake | `lemon-cheesecake.webp`, `lemon-cheesecake-lg.webp` |
-| Biscoff | `biscoff.webp`, `biscoff-lg.webp` |
-| White KitKat | `white-kitkat.webp`, `white-kitkat-lg.webp` |
-| Reese's | `reese-s.webp`, `reese-s-lg.webp` |
-| Oreo | `oreo.webp`, `oreo-lg.webp` |
-
-**Format:** square, transparent background. `-lg` is 1200 × 1200, the small one 480 × 480. Leave about 6% clear space around the cookie so rotations never clip it.
-
-**Prompt (change the flavour line each time):**
-
-> Top-down product photo of one chunky homemade stuffed cookie, about 10 cm wide, perfectly centred, seen from directly above. **[Red velvet cookie, deep red dough, a swirl of white cream cheese filling showing on top, a few white chocolate chips.]** Craggy cracked top, slightly uneven round edge, soft even studio light, no harsh shadow. Isolated on a plain white background for cutting out. Sharp focus, high detail. No plate, no crumbs, no text.
-
-Flavour lines to swap in:
-
-- **Classic chocolate:** golden brown dough with big melted dark and milk chocolate chunks and a pinch of flaky salt.
-- **Red velvet:** deep red dough, a swirl of white cream cheese filling showing on top, a few white chocolate chips.
-- **Lemon cheesecake:** pale golden dough, a glossy lemon curd centre, crumbled biscuit and white chocolate on top.
-- **Biscoff:** caramel-coloured dough with a pool of melted Biscoff spread in the centre and pieces of Biscoff biscuit on top.
-- **White KitKat:** golden dough studded with chunks of white chocolate KitKat bar and white chocolate.
-- **Reese's:** peanut butter dough with halved peanut butter cups pressed into the top and a drizzle of peanut butter.
-- **Oreo:** dark cocoa dough with big pieces of Oreo cookie and a white cream filling centre.
-
-If the generator can't do transparent backgrounds, generate on white and send them to me; I'll cut them out the same way as the current set.
-
----
-
-## Switching the photos on
-
-1. Put the files in `public/images/` with the exact names above.
-2. Open `src/lib/photos.ts` and replace `null` with the path, for example:
-
-   ```ts
-   heroDesktop: '/images/hero-desktop.webp',
-   heroMobile: '/images/hero-mobile.webp',
-   ```
-
-3. The hero and footer swap the drawn still life for your photo. If you'd rather I do it (and tune the crop and the headline position against the actual image), just drop the files in and tell me.
+| File id | [FLAVOUR] |
+|---|---|
+| `classic-chocolate` | Golden dough, big melted dark and milk chocolate chunks, flaky salt |
+| `red-velvet` | Deep red dough, white cream cheese swirl on top, white chocolate chips |
+| `biscoff` | Caramel dough, a pool of melted Biscoff spread in the centre, Biscoff biscuit pieces |
+| `white-kitkat` | Golden dough with white chocolate KitKat chunks and a white glaze |
+| `reese-s` | Dark chocolate dough, halved peanut butter cups pressed into the top |
+| `oreo` | Dark cocoa dough, big Oreo pieces, white cream frosting centre |
+| `toasted-marshmallow` | Brown butter dough, torched marshmallow centre, caramel pockets, biscuit crumble |

@@ -4,7 +4,7 @@ import { FlavourStage } from '../components/home/FlavourStage'
 import { Hero } from '../components/home/Hero'
 import { Instagram } from '../components/home/Instagram'
 import { ShopTrio } from '../components/home/ShopTrio'
-import { Statement } from '../components/home/Statement'
+import { Journey } from '../components/home/Journey'
 
 export function Home() {
   return (
@@ -12,7 +12,7 @@ export function Home() {
       <main id="main">
         <Hero />
         <ShopTrio />
-        <Statement />
+        <Journey />
         <FlavourStage />
         <Instagram />
         <Contact />

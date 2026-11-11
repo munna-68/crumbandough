@@ -31,12 +31,12 @@ export function useTransition() {
   return ctx
 }
 
-/** The seal: the cocoa badge with two bites out of its rim, as in the preloader. */
-function Seal() {
+/** The seal: the badge with two bites out of its rim, as in the preloader. */
+export function Seal({ id, className = 'pt__seal-art' }: { id: string; className?: string }) {
   return (
-    <svg className="pt__seal-art" viewBox="0 0 200 200" aria-hidden="true">
+    <svg className={className} viewBox="0 0 200 200" aria-hidden="true">
       <defs>
-        <mask id="pt-bites" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
+        <mask id={id} maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="200">
           <rect width="200" height="200" fill="#fff" />
           {[
             [168, 40, 16],
@@ -50,8 +50,8 @@ function Seal() {
           ))}
         </mask>
       </defs>
-      <circle cx="100" cy="100" r="92" className="pt__seal-disc" mask="url(#pt-bites)" />
-      <circle cx="100" cy="100" r="78" className="pt__seal-ring" mask="url(#pt-bites)" />
+      <circle cx="100" cy="100" r="92" className="pt__seal-disc" mask={`url(#${id})`} />
+      <circle cx="100" cy="100" r="78" className="pt__seal-ring" mask={`url(#${id})`} />
       <text x="100" y="92" textAnchor="middle" className="pt__seal-word">
         crumb
       </text>
@@ -146,7 +146,7 @@ export function TransitionProvider({ children }: { children: ReactNode }) {
           <div key={side} className={`pt__flap pt__flap--${side}`}>
             <span className="pt__tab" />
             <span className="pt__seal">
-              <Seal />
+              <Seal id={`pt-bites-${side}`} />
             </span>
             <span className="pt__shade" />
           </div>

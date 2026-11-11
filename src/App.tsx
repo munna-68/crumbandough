@@ -25,7 +25,7 @@ export function App() {
 
   return (
     <>
-      <Nav />
+      {location.pathname === '/kitchen' ? null : <Nav />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
